@@ -130,6 +130,35 @@ Linting
 
 To enforce coding style in python, we'll use:
 
+`black <https://black.readthedocs.io/en/stable/>`_
+  Black is the "uncompromising code formatter"
+
+  Used with default configuration.
+
+  To check::
+
+    make check-black
+
+  To apply::
+
+    make black
+
+
+`isort <https://isort.readthedocs.io/>`_
+  isort is a Python utility / library to sort imports alphabetically, and automatically separated into sections
+
+  Used with special configuration.
+
+  To check::
+
+    make check-isort
+
+  To apply::
+
+    make isort
+
+But we still use lint checkers:
+
 `pylint <https://docs.pylint.org/>`_
   Pylint is a tool that checks for errors in Python code, tries to enforce a coding standard and looks for code smells.
 
@@ -170,9 +199,15 @@ To enforce coding style in python, we'll use:
 
     make flake8
 
-Other related `make` command:
+Yes, it's a lot. My IDE is configured to run isort + black on every save. So pylint and flake8 should report very few things, and when they does, it will mainly be about code badly written.
 
-- Run all lint checkers (pylint, flake8)::
+Other related `make` commands:
+
+- Run isort and black::
+
+    make pretty
+
+- Run all lint checkers (isort, black, pylint, flake8 and mypy)::
 
     make lint
 

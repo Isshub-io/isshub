@@ -66,13 +66,23 @@ tests:  ## Run tests for the isshub project.
 	@pytest
 
 .PHONY: lint
-lint:  ## Run all linters (flake8, pylint)
-lint: flake8 pylint
+lint:  ## Run all linters (check-isort, check-black, flake8, pylint)
+lint: check-isort check-black flake8 pylint
 
 .PHONY: check checks
 check: checks
 checks:  ## Run all checkers (lint, tests)
 checks: lint test
+
+.PHONY: check-isort
+check-isort:  ## Run the isort tool in check mode only (won't modify files)
+	@echo "$(BOLD)Checking isort(RESET)"
+	@isort --check-only 2>&1
+
+.PHONY: check-black
+check-black:  ## Run the black tool in check mode only (won't modify files)
+	@echo "$(BOLD)Checking black$(RESET)"
+	@black --target-version py38 --check  . 2>&1
 
 .PHONY: flake8
 flake8:  ## Run the flake8 tool
@@ -83,3 +93,17 @@ flake8:  ## Run the flake8 tool
 pylint:  ## Run the pylint tool
 	@echo "$(BOLD)Running pylint$(RESET)"
 	@pylint isshub
+
+.PHONY: pretty
+pretty:  ## Run all code beautifiers (isort, black)
+pretty: isort black
+
+.PHONY: isort
+isort:  ## Run the isort tool and update files that need to
+	@echo "$(BOLD)Running isort$(RESET)"
+	@isort --atomic --apply
+
+.PHONY: black
+black:  ## Run the black tool and update files that need to
+	@echo "$(BOLD)Running black$(RESET)"
+	@black --target-version py38 .
