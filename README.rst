@@ -296,6 +296,16 @@ The commits are so important to me that they will be available in the "Internals
 
 Also, I'm a fan of `git-flow <https://nvie.com/posts/a-successful-git-branching-model/>`_ and it (the `avh edition <https://github.com/petervanderdoes/gitflow-avh>`_) will be used in this project, but adding the username in the branch name (easier to filter on if many users), so for example my own development branches will be prefixed by `features/twidi/`. (If branches from other people in pull requests do not follow this pattern, it will be done on my side)
 
+Continuous integration
+======================
+
+All of these tools will be run via continuous integration, on `CircleCi <https://circleci.com/>`_.
+
+One status will be posted on Github for each job for every pull requests.
+
+To access the list of jobs: https://circleci.com/gh/Isshub-io/isshub
+
+
 ''''''
 Coding
 ''''''
