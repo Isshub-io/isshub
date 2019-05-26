@@ -1,0 +1,16 @@
+type(scope): Short description (72 chars max for line)
+
+Abstract
+========
+
+A short description of the issue being addressed.
+
+Motivation
+==========
+
+Clearly explain why this is needed.
+
+Rationale
+=========
+
+Describe why particular design decisions were made.

@@ -247,6 +247,49 @@ I *may* use TDD (`Test-Driven Development <https://en.wikipedia.org/wiki/Test-dr
 Git
 ===
 
+Commits are as much important as code. They hold the whole history of the project and commits can be used to know why things were done a certain way.
+
+So I want my commits to be very descriptive. So I'll follow a specification, based on `conventional commits <https://www.conventionalcommits.org>`_, at least for the title of the commit. Please refer to this documentation to know more about the syntax. The accepted types are:
+
+- build
+- ci
+- chore
+- docs
+- feat
+- fix
+- perf
+- refactor
+- revert
+- style
+- tests
+
+The description will be written in restructured text (like all the documentation in this project), with 3 mandatory sections:
+
+Abstract
+  A short description of the issue being addressed.
+
+Motivation
+  Describe why particular design decisions were made.
+
+Rationale
+  Describe why particular design decisions were made.
+
+This is heavily inspired by the `PEP suggested sections <https://www.python.org/dev/peps/pep-0012/#suggested-sections>`_, and other sections can be added from the list in pep 0012, but the three ones above are mandatory, in this order.
+
+This will also be checked by the CI for every commits.
+
+The repository provides a template in `.gitmessage` to use for new commits. To instruct git to use it, run::
+
+    git config commit.template .gitmessage
+
+
+To check if the last commit is valid, you can run::
+
+    make check-commit
+
+If you want to validate an other commit message than the last one, check `ci/check_commit_message.py -h`
+
+
 ''''''
 Coding
 ''''''

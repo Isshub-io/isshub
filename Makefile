@@ -72,7 +72,7 @@ lint: check-isort check-black flake8 pylint mypy
 .PHONY: check checks
 check: checks
 checks:  ## Run all checkers (lint, tests)
-checks: lint test
+checks: lint tests check-commit
 
 .PHONY: mypy
 mypy:  ## Run the mypy tool
@@ -112,3 +112,8 @@ isort:  ## Run the isort tool and update files that need to
 black:  ## Run the black tool and update files that need to
 	@echo "$(BOLD)Running black$(RESET)"
 	@black --target-version py38 .
+
+.PHONY: check-commit
+check-commit: ## Check the validaity of the last commit message
+	@echo "$(BOLD)Checking last commit message$(RESET)"
+	@ci/check_commit_message.py -vl
