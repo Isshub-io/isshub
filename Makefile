@@ -20,12 +20,12 @@ install:  ## Install the project in the current environment, with its dependenci
 .PHONY: dev
 dev:  ## Install the project in the current environment, with its dependencies, including the ones needed in a development environment
 	@echo "$(BOLD)Installing $(PROJECT_NAME) $(PROJECT_VERSION) in dev mode$(RESET)"
-	@pip install -e .[dev,tests,docs]
+	@pip install -e .[dev,tests,lint,docs]
 	@$(MAKE) full-clean
 
 .PHONY: dev-upgrade
 dev-upgrade:  ## Upgrade all default+dev dependencies defined in setup.cfg
-	@pip install --upgrade `python -c 'import setuptools; o = setuptools.config.read_configuration("setup.cfg")["options"]; print(" ".join(o["install_requires"] + o["extras_require"]["dev"] + o["extras_require"]["tests"] + o["extras_require"]["docs"]))'`
+	@pip install --upgrade `python -c 'import setuptools; o = setuptools.config.read_configuration("setup.cfg")["options"]; print(" ".join(o["install_requires"] + o["extras_require"]["dev"] + o["extras_require"]["tests"] + o["extras_require"]["lint"] + o["extras_require"]["docs"]))'`
 	@pip install -e .
 	@$(MAKE) full-clean
 
@@ -64,3 +64,22 @@ test: tests  # we allow "test" and "tests"
 tests:  ## Run tests for the isshub project.
 	@echo "$(BOLD)Running tests$(RESET)"
 	@pytest
+
+.PHONY: lint
+lint:  ## Run all linters (flake8, pylint)
+lint: flake8 pylint
+
+.PHONY: check checks
+check: checks
+checks:  ## Run all checkers (lint, tests)
+checks: lint test
+
+.PHONY: flake8
+flake8:  ## Run the flake8 tool
+	@echo "$(BOLD)Running flake8$(RESET)"
+	@flake8 --format=abspath
+
+.PHONY: pylint
+pylint:  ## Run the pylint tool
+	@echo "$(BOLD)Running pylint$(RESET)"
+	@pylint isshub

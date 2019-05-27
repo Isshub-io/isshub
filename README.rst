@@ -128,8 +128,62 @@ All tools are incorporated in a `Makefile`, so it's easier to run commands. Tool
 Linting
 =======
 
+To enforce coding style in python, we'll use:
+
+`pylint <https://docs.pylint.org/>`_
+  Pylint is a tool that checks for errors in Python code, tries to enforce a coding standard and looks for code smells.
+
+  With some code specifically ignored, and also with this plugin:
+
+  `pylint.extensions.docparams <http://pylint.pycqa.org/en/stable/technical_reference/extensions.html#parameter-documentation-checker>`_
+    If you document the parameters of your functions, methods and constructors and their types systematically in your code this optional component might be useful for you.
+
+    Using configuration to enforce complete docstrings, using NumPy style.
+
+  To run `pylint`::
+
+    make pylint
+
+`flake8 <http://flake8.pycqa.org>`_
+  Flake8: Your Tool For Style Guide Enforcement
+
+  A wrapper around `PyFlakes <https://pypi.org/project/pyflakes/>`_, `pycodestyle <https://pypi.org/project/pycodestyle/>`_ (formerly called pep8), `McCabe <https://pypi.org/project/mccabe/>`_.
+
+  With these plugins;
+
+  `flake8-bugbear <https://pypi.org/project/flake8-bugbear/>`_
+    A plugin for Flake8 finding likely bugs and design problems in your program
+
+  `flake8-comprehensions <https://pypi.org/project/flake8-comprehensions/>`_
+    A flake8 plugin that helps you write better list/set/dict comprehensions.
+
+  `flake8-docstrings <https://pypi.org/project/flake8-docstrings/>`_
+    A simple module that adds an extension for the fantastic `pydocstyle <http://www.pydocstyle.org>`_ tool to flake8.
+
+  `flake8-imports <https://pypi.org/project/flake8-imports/>`_
+    Flake8 extension to run isort check over the source files.
+
+  `flake8-mypy <https://pypi.org/project/flake8-mypy/>`_
+    A plugin for Flake8 integrating `mypy <http://mypy-lang.org/>`_.
+
+  To run `flake8`::
+
+    make flake8
+
+Other related `make` command:
+
+- Run all lint checkers (pylint, flake8)::
+
+    make lint
+
 Documentation
 =============
+
+For code documentation, I enforce docstrings in all modules, classes, and functions/methods, using `NumPy style documentation <https://numpydoc.readthedocs.io>`_, using python typing "types" to define the types of parameters and return values.
+
+The checks are enforced by `flake8-docstrings`_ for basic docstring presentation, and by `pylint.extensions.docparams`_ for content.
+
+So, code documentation is important (take that, Django). But it is clearly not enough.
 
 We need to document the install process and how to run the application, how to participate and use all the tools, how things works, from a developer point of view and from a user point of view, etc, etc.
 
