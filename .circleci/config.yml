@@ -1,0 +1,48 @@
+version: 2
+
+references:
+
+  # docker container for python only jobs
+  python_only_config: &python_only_config
+    working_directory: ~/isshub
+    docker:
+      - image: circleci/python:3.8.0a3
+
+  # build steps to save/restore the directory used by pip to cache downloaded packages
+  save_pip_cache: &save_pip_cache
+    save_cache:
+      key: v1-pip-cache-{{ .Branch }}-{{ .Revision }}
+      paths:
+        - ~/.cache/pip
+  restore_pip_cache: &restore_pip_cache
+    restore_cache:
+      keys:
+        - v1-pip-cache-{{ .Branch }}-{{ .Revision }}
+        - v1-pip-cache-{{ .Branch }}
+        - v1-pip-cache
+
+  # shortcut to attach the workspace before each job
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: "~/"
+
+
+# jobs definition: they are used in ``workflows``
+jobs:
+
+  # get the code from git and save the repo to pass it to the next job
+  checkout_code:
+    <<: *python_only_config
+    steps:
+      - checkout
+      - persist_to_workspace:
+          root: "~/"
+          paths:
+            - isshub
+
+workflows:
+  version: 2
+
+  isshub:
+    jobs:
+      - checkout_code
