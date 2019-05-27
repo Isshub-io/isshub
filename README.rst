@@ -145,6 +145,12 @@ The documentation will be available at `<https://isshub.readthedocs.io>`_ and wi
 Testing
 =======
 
+For tests I won't use unittest (and so not the Django test subclasses), but `pytest <https://docs.pytest.org/>`_
+
+And I want to do things a little bit differently that we are used too.
+
+I *may* use TDD (`Test-Driven Development <https://en.wikipedia.org/wiki/Test-driven_development>`_), but it's not sure yet, as I'm really not used to it. Will see.
+
 Git
 ===
 

@@ -20,12 +20,12 @@ install:  ## Install the project in the current environment, with its dependenci
 .PHONY: dev
 dev:  ## Install the project in the current environment, with its dependencies, including the ones needed in a development environment
 	@echo "$(BOLD)Installing $(PROJECT_NAME) $(PROJECT_VERSION) in dev mode$(RESET)"
-	@pip install -e .[dev,docs]
+	@pip install -e .[dev,tests,docs]
 	@$(MAKE) full-clean
 
 .PHONY: dev-upgrade
 dev-upgrade:  ## Upgrade all default+dev dependencies defined in setup.cfg
-	@pip install --upgrade `python -c 'import setuptools; o = setuptools.config.read_configuration("setup.cfg")["options"]; print(" ".join(o["install_requires"] + o["extras_require"]["dev"] + o["extras_require"]["docs"]))'`
+	@pip install --upgrade `python -c 'import setuptools; o = setuptools.config.read_configuration("setup.cfg")["options"]; print(" ".join(o["install_requires"] + o["extras_require"]["dev"] + o["extras_require"]["tests"] + o["extras_require"]["docs"]))'`
 	@pip install -e .
 	@$(MAKE) full-clean
 
@@ -43,7 +43,7 @@ clean:  ## Clean python build related directories and files
 full-clean:  ## Like "clean" but with clean-doc and will clean some other generated directories or files
 full-clean: clean
 	@echo "$(BOLD)Full cleaning$(RESET)"
-	find ./ -type d -name '__pycache__' -print0 | xargs -tr0 rm -r
+	find ./ -type d \( -name '__pycache__' -or -name '.pytest_cache'  \) -print0 | xargs -tr0 rm -r
 	-$(MAKE) clean-doc
 
 .PHONY: doc docs
@@ -58,3 +58,9 @@ clean-doc:  ## Clean the documentation directories
 	@echo "$(BOLD)Cleaning documentation directories$(RESET)"
 	@rm -rf docs/source
 	@cd docs && $(MAKE) clean
+
+.PHONY: tests test
+test: tests  # we allow "test" and "tests"
+tests:  ## Run tests for the isshub project.
+	@echo "$(BOLD)Running tests$(RESET)"
+	@pytest
