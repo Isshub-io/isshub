@@ -154,6 +154,21 @@ jobs:
             source ~/venv/bin/activate
             make doc
 
+  # run check and tests for every commit in the history for which it is not already done
+  check_every_commit:
+    <<: *python_only_config
+    steps:
+      - *attach_workspace
+      - *restore_pip_cache
+      - type: shell
+        name: Install system dependencies
+        command: sudo apt-get update -qq -y && sudo apt-get install -y curl jq
+      - run:
+          name: Check every commits
+          command: |
+            source ~/venv/bin/activate
+            ci/check-every-commit.sh
+
   # will build the python package, using the tag as the base version, suffixed with info from git describe if not a tag
   build_python_package:
     <<: *python_only_config
@@ -250,6 +265,9 @@ workflows:
           requires:
             - install_code
       - build_doc:
+          requires:
+            - install_code
+      - check_every_commit:
           requires:
             - install_code
       - build_python_package:

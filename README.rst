@@ -294,6 +294,10 @@ If you want to validate an other commit message than the last one, check `ci/che
 
 The commits are so important to me that they will be available in the "Internals" part of the documentation in a easily browsable way.
 
+Another important thing is that, in my opinion, the state of the project after every commit must be a valid state: tests must pass. It is absolutely necessary when you want to find the source of a bug via `git-bisect`.
+
+This will be validated by the CI that will run all the CI jobs for all the commits, via the `ci/check-every-commit.sh` script.
+
 Also, I'm a fan of `git-flow <https://nvie.com/posts/a-successful-git-branching-model/>`_ and it (the `avh edition <https://github.com/petervanderdoes/gitflow-avh>`_) will be used in this project, but adding the username in the branch name (easier to filter on if many users), so for example my own development branches will be prefixed by `features/twidi/`. (If branches from other people in pull requests do not follow this pattern, it will be done on my side)
 
 Continuous integration
@@ -301,7 +305,7 @@ Continuous integration
 
 All of these tools will be run via continuous integration, on `CircleCi <https://circleci.com/>`_.
 
-One status will be posted on Github for each job for every pull requests.
+One status will be posted on Github for each job for every pull requests.  In addition, every commit will also have a status, via the `check-every-commit` job.
 
 To access the list of jobs: https://circleci.com/gh/Isshub-io/isshub
 
