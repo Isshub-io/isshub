@@ -20,12 +20,12 @@ install:  ## Install the project in the current environment, with its dependenci
 .PHONY: dev
 dev:  ## Install the project in the current environment, with its dependencies, including the ones needed in a development environment
 	@echo "$(BOLD)Installing $(PROJECT_NAME) $(PROJECT_VERSION) in dev mode$(RESET)"
-	@pip install -e .[dev]
+	@pip install -e .[dev,docs]
 	@$(MAKE) full-clean
 
 .PHONY: dev-upgrade
 dev-upgrade:  ## Upgrade all default+dev dependencies defined in setup.cfg
-	@pip install --upgrade `python -c 'import setuptools; o = setuptools.config.read_configuration("setup.cfg")["options"]; print(" ".join(o["install_requires"] + o["extras_require"]["dev"]))'`
+	@pip install --upgrade `python -c 'import setuptools; o = setuptools.config.read_configuration("setup.cfg")["options"]; print(" ".join(o["install_requires"] + o["extras_require"]["dev"] + o["extras_require"]["docs"]))'`
 	@pip install -e .
 	@$(MAKE) full-clean
 
@@ -40,7 +40,21 @@ clean:  ## Clean python build related directories and files
 	@rm -rf build dist $(PROJECT_NAME).egg-info
 
 .PHONY: full-clean
-full-clean:  ## Like "clean" but will clean some other generated directories or files
+full-clean:  ## Like "clean" but with clean-doc and will clean some other generated directories or files
 full-clean: clean
 	@echo "$(BOLD)Full cleaning$(RESET)"
 	find ./ -type d -name '__pycache__' -print0 | xargs -tr0 rm -r
+	-$(MAKE) clean-doc
+
+.PHONY: doc docs
+docs: doc  # we allow "doc" and "docs"
+doc:  clean-doc ## Build the documentation
+	@echo "$(BOLD)Building documentation$(RESET)"
+	@cd docs && $(MAKE) html
+
+.PHONY: clean-docs
+clean-docs: clean-doc  # we allow "clean-doc" and "clean-docs"
+clean-doc:  ## Clean the documentation directories
+	@echo "$(BOLD)Cleaning documentation directories$(RESET)"
+	@rm -rf docs/source
+	@cd docs && $(MAKE) clean

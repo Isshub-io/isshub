@@ -131,6 +131,17 @@ Linting
 Documentation
 =============
 
+We need to document the install process and how to run the application, how to participate and use all the tools, how things works, from a developer point of view and from a user point of view, etc, etc.
+
+All of this will be done via `sphinx <http://www.sphinx-doc.org>`_ and the documentation will be hosted on `ReadTheDocs <https://readthedocs.org>`_.
+
+To build the documentation locally, simply run::
+
+  make docs
+
+
+The documentation will be available at `<https://isshub.readthedocs.io>`_ and will contain everything, including the current document and the documented source code.
+
 Testing
 =======
 
