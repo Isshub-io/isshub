@@ -43,7 +43,7 @@ clean:  ## Clean python build related directories and files
 full-clean:  ## Like "clean" but with clean-doc and will clean some other generated directories or files
 full-clean: clean
 	@echo "$(BOLD)Full cleaning$(RESET)"
-	find ./ -type d \( -name '__pycache__' -or -name '.pytest_cache'  \) -print0 | xargs -tr0 rm -r
+	find ./ -type d  \( -name '__pycache__' -or -name '.pytest_cache' -or -name '.mypy_cache'  \) -print0 | xargs -tr0 rm -r
 	-$(MAKE) clean-doc
 
 .PHONY: doc docs
@@ -66,13 +66,18 @@ tests:  ## Run tests for the isshub project.
 	@pytest
 
 .PHONY: lint
-lint:  ## Run all linters (check-isort, check-black, flake8, pylint)
-lint: check-isort check-black flake8 pylint
+lint:  ## Run all linters (check-isort, check-black, mypy, flake8, pylint)
+lint: check-isort check-black flake8 pylint mypy
 
 .PHONY: check checks
 check: checks
 checks:  ## Run all checkers (lint, tests)
 checks: lint test
+
+.PHONY: mypy
+mypy:  ## Run the mypy tool
+	@echo "$(BOLD)Running mypy$(RESET)"
+	@mypy .
 
 .PHONY: check-isort
 check-isort:  ## Run the isort tool in check mode only (won't modify files)

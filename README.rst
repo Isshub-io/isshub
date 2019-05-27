@@ -218,6 +218,10 @@ For code documentation, I enforce docstrings in all modules, classes, and functi
 
 The checks are enforced by `flake8-docstrings`_ for basic docstring presentation, and by `pylint.extensions.docparams`_ for content.
 
+I'll try to use `python typing <https://docs.python.org/3/library/typing.html>`_ while avoiding making things too much complicated. So expect some `# type: ignore` comments here and there, notably on decorators.
+
+The types will be checked by `mypy`_.
+
 So, code documentation is important (take that, Django). But it is clearly not enough.
 
 We need to document the install process and how to run the application, how to participate and use all the tools, how things works, from a developer point of view and from a user point of view, etc, etc.
