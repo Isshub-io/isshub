@@ -121,3 +121,14 @@ def run_apidoc(_):
 def setup(app):
     # Run apidoc
     app.connect("builder-inited", run_apidoc)
+    # Add custom css/js for rtd template
+    app.add_css_file("css/custom.css")
+    app.add_js_file("js/custom.js")
+    # Add git content into doc
+    current_dir = os.path.dirname(__file__)
+    subprocess.run(
+        [
+            os.path.join(current_dir, "git_to_sphinx.py"),
+            os.path.normpath(os.path.join(current_dir, "..")),
+        ]
+    )

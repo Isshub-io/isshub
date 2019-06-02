@@ -232,8 +232,11 @@ To build the documentation locally, simply run::
 
   make docs
 
+The documentation will be available at `<https://isshub.readthedocs.io>`_ and will contain everything, including the current document, the documented source code, and every commit.
 
-The documentation will be available at `<https://isshub.readthedocs.io>`_ and will contain everything, including the current document and the documented source code.
+**Every commit?**
+
+Yes, as will see later in this document, each commit will have a detailed description about the why and the how things are done, so in my opinion, it's like documentation about the process of development. This will be done via `PyDriller <https://pydriller.readthedocs.io>`_.
 
 Testing
 =======
@@ -289,6 +292,7 @@ To check if the last commit is valid, you can run::
 
 If you want to validate an other commit message than the last one, check `ci/check_commit_message.py -h`
 
+The commits are so important to me that they will be available in the "Internals" part of the documentation in a easily browsable way.
 
 ''''''
 Coding
