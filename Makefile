@@ -63,7 +63,8 @@ clean-doc:  ## Clean the documentation directories
 test: tests  # we allow "test" and "tests"
 tests:  ## Run tests for the isshub project.
 	@echo "$(BOLD)Running tests$(RESET)"
-	@pytest
+	@## we ignore error 5 from pytest meaning there is no test to run
+	@pytest || ( ERR=$$?; if [ $${ERR} -eq 5 ]; then (exit 0); else (exit $${ERR}); fi )
 
 .PHONY: lint
 lint:  ## Run all linters (check-isort, check-black, mypy, flake8, pylint)
