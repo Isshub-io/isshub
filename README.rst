@@ -247,6 +247,142 @@ And I want to do things a little bit differently that we are used too.
 
 I *may* use TDD (`Test-Driven Development <https://en.wikipedia.org/wiki/Test-driven_development>`_), but it's not sure yet, as I'm really not used to it. Will see.
 
+But...
+
+See this `tweet from Cory House <https://mobile.twitter.com/housecor/status/1124308540162805761>`_:
+
+  Test descriptions should ideally include:
+    1. The name of the system under test
+    2. The scenario under test
+    3. The expected result
+
+  Why?
+    1. It makes the test easier to understand (remember, tests are docs too)
+    2. It makes the test easier to fix when it fails
+
+  -- @housecor 2019-05-03
+
+How to do this?
+
+Generally a test function is written this way:
+
+.. code-block:: python
+
+  def test_concat():
+      assert concat('foo', 'bar') == 'foobar'
+
+We can give it a bette name:
+
+.. code-block:: python
+
+  def test_concat_should_concat_two_strings():
+      assert concat('foo', 'bar') == 'foobar'
+
+And add a docstring:
+
+.. code-block:: python
+
+  def test_concat_should_concat_two_strings():
+      """The ``concat`` function should concat the two given strings."""
+      assert concat('foo', 'bar') == 'foobar'
+
+We still don't respect what's said in the tweet.
+
+And also there is no formalism.
+
+What if we can say something like:
+
+  Given the strings "foo" and "bar", when I pass them to the concat function, then it should return "foobar".
+
+So let's use it:
+
+.. code-block:: python
+
+  def test_concat_should_concat_two_strings():
+      """Given the strings "foo" and "bar", when I pass them to the concat function, then it should return "foobar"."""
+      assert concat('foo', 'bar') == 'foobar'
+
+It's better.
+
+If this test sounds familiar to you, its normal: it's `Gherkin language <https://cucumber.io/docs/gherkin/reference/>`_ and used in BDD (`Behavior-driven development <https://en.wikipedia.org/wiki/Behavior-driven_development>`_)
+
+BDD is generally used for functional tests. But I want to test if it can be applied at other levels: unit tests and integration tests.
+
+So let's use `pytest-bdd <https://github.com/pytest-dev/pytest-bdd>`_ to write this test.
+
+First, the Gherkin, in a file `concat-function.feature`:
+
+.. code-block:: gherkin
+
+  Feature: concat function
+
+    Scenario: Concatenating two strings
+      Given a string "foo"
+      And a string "bar"
+      When I pass them to the concat function
+      Then I should get "foobar" in retun
+
+Then the test:
+
+.. code-block:: python
+
+  from pytest_bdd import scenario, given, when, then
+
+  @scenario('concat-function.feature', 'Concatenating two strings')
+  def test_concat():
+      pass
+
+  @given('a string "foo"')
+  def string_foo():
+      return 'foo'
+
+  @given('a string "bar"')
+  def string_bar():
+      return 'bar'
+
+  @when('I pass them to the concat function')
+  def concat_foo_and_bar(string_foo, string_bar):
+      return concat(string_foo)
+
+  @then('I should get "foobar" in return')
+  def result_should_be_foobar(concat_foo_and_bar):
+      assert concat_foo_and_bar == 'foobar'
+
+It can seems cumbersome, but we can:
+ - use the great power of pytest fixtures
+ - parametrize the strings
+ - use the parametrize feature of pytest to run a scenario for different inputs
+
+I won't go further here on how to make this code less cumbersome and more reusable, but as all my tests will be written this way, you'll see a lot of examples.
+
+Among the benefits:
+ - the "features", ie the tests (in Gherkin) are readable/writeable by everyone
+ - we can write our "features" in advance: we have the specifications and documentation
+ - we have a formal way of describing what we test and how we do it.
+ - every part does one thing so easy to correct if needed
+
+The main (and only one, in my opinion) inconvenient is that tests may be longer to write. But we cannot have some advantages without losing something, and for me it's something I can live with.
+
+And you'll be surprised to see this "BDD" thing used in very unusual case. An example?
+
+.. code-block:: gherkin
+
+  Feature: Describing a Repository
+
+    Scenario: A Repository has a name
+        Given a Repository
+        Then it must have a field named name
+
+    Scenario: A Repository name is a string
+        Given a Repository
+        Then its name must be a string
+
+    Scenario: A Repository name cannot be None
+        Given a Repository
+        Then its name cannot be None
+
+Yes, things like that :)
+
 Git
 ===
 
