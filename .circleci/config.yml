@@ -201,13 +201,16 @@ jobs:
           command: |
             ls -la
             mv dist _dist
-            rm -r isshub
+            find ./isshub/ -type f -not -path '*/tests/*' -not -path '*/features/*' -delete
+            find ./isshub/ -type d -empty -delete
+            find ./isshub/ -type d -not -path '*/tests/*' -not -path '*/features/*' -not -name 'tests' -not -name 'features' -exec touch "{}/__init__.py" \;
+            mv isshub isshub_tests
             make full-clean
             python -m venv ~/venv
             source ~/venv/bin/activate
             pip install --upgrade pip
             pip install $(ls -tr _dist/*.whl | tail -n 1)[tests]
-            make tests
+            make tests-nocov
 
   # will test that the python tar.gz package is installable and works
   test_python_package_targz:
@@ -226,13 +229,16 @@ jobs:
             source ~/venv/bin/activate
             pip install --upgrade pip
             mv dist _dist
-            rm -r isshub
+            find ./isshub/ -type f -not -path '*/tests/*' -not -path '*/features/*' -delete
+            find ./isshub/ -type d -empty -delete
+            find ./isshub/ -type d -not -path '*/tests/*' -not -path '*/features/*' -not -name 'tests' -not -name 'features' -exec touch "{}/__init__.py" \;
+            mv isshub isshub_tests
             make full-clean
             python -m venv ~/venv
             source ~/venv/bin/activate
             pip install --upgrade pip
             pip install $(ls -tr _dist/*.tar.gz | tail -n 1)[tests]
-            make tests
+            make tests-nocov
 
 workflows:
   version: 2

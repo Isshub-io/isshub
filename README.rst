@@ -453,6 +453,31 @@ Coding
 Domain
 ======
 
+As said previously, I'll use Domain Driven Development, at least some parts, not sure yet.
+
+The first step is to have a `isshub.domain` package.
+
+It will contain some sub-packages:
+
+contexts
+--------
+
+Bounded contexts are used to separate groups of things that work together but independent of other contexts.
+
+The contexts hold some entities, objects that have a distinct identity.
+
+The contexts are:
+
+core
+''''
+
+The `core` context will hold the "core" domaines, around repositories, issues, code requests...
+
+Its entities are:
+
+Repository
+    Repositories are the central entity of the whole isshub project. Everything is tied to them, at one level or another.
+
 Fetching
 ========
 
