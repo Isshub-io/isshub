@@ -1,10 +1,10 @@
 """Package defining the ``Repository`` entity."""
 
-from dataclasses import dataclass
+from isshub.domain.utils.entity import BaseModelWithId, required_field, validated
 
 
-@dataclass
-class Repository:
+@validated()  # type: ignore
+class Repository(BaseModelWithId):
     """A repository holds code, issues, code requests...
 
     Attributes
@@ -18,8 +18,5 @@ class Repository:
 
     """
 
-    __slots__ = ["id", "name", "namespace"]
-
-    id: int
-    name: str
-    namespace: str
+    name: str = required_field(str)  # type: ignore
+    namespace: str = required_field(str)  # type: ignore
