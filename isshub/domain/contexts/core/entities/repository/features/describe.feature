@@ -28,9 +28,9 @@ Feature: Describing a Repository
         Given a Repository
         Then it must have a field named namespace
 
-    Scenario: A Repository namespace is a string
+    Scenario: A Repository namespace is a Namespace
         Given a Repository
-        Then its namespace must be a string
+        Then its namespace must be a Namespace
 
     Scenario: A Repository namespace cannot be None
         Given a Repository

@@ -471,12 +471,14 @@ The contexts are:
 core
 ''''
 
-The `core` context will hold the "core" domaines, around repositories, issues, code requests...
+The `core` context will hold the "core" domain, around repositories, issues, code requests...
 
 Its entities are:
 
 Repository
     Repositories are the central entity of the whole isshub project. Everything is tied to them, at one level or another.
+Namespace
+    A namespace is a place where repositories or other namespaces are stored.
 
 Fetching
 ========
