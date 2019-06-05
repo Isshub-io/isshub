@@ -1,5 +1,6 @@
 """Package defining the ``Namespace`` entity."""
 
+import enum
 from typing import Optional
 
 from isshub.domain.utils.entity import (
@@ -8,6 +9,14 @@ from isshub.domain.utils.entity import (
     required_field,
     validated,
 )
+
+
+class NamespaceKind(enum.Enum):
+    """All the available kinds of namespace."""
+
+    ORGANIZATION = "Organization"
+    TEAM = "Team"
+    GROUP = "Group"
 
 
 @validated()  # type: ignore
@@ -27,11 +36,14 @@ class _Namespace(BaseModelWithId):
         The name of the namespace. Unique in its parent namespace.
     namespace : Optional[Namespace]
         Where the namespace can be found.
+    kind : NamespaceKind
+        The kind of namespace.
 
     """
 
     name: str = required_field(str)  # type: ignore
     namespace = None
+    kind: NamespaceKind = required_field(NamespaceKind)  # type: ignore
 
 
 @validated()  # type: ignore
@@ -46,6 +58,8 @@ class Namespace(_Namespace):
         The name of the namespace. Unique in its parent namespace.
     namespace : Optional[str]
         Where the namespace can be found.
+    kind : NamespaceKind
+        The kind of namespace.
 
     """
 

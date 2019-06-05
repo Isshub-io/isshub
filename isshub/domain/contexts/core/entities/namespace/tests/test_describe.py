@@ -4,6 +4,7 @@ import pytest
 from pytest import mark
 from pytest_bdd import given, parsers, scenario, scenarios, then
 
+from isshub.domain.contexts.core.entities.namespace import NamespaceKind
 from isshub.domain.utils.testing.validation import (
     check_field,
     check_field_not_nullable,
@@ -34,6 +35,15 @@ def test_namespace_name_is_a_string(value, exception):
 )
 @scenario("../features/describe.feature", "A Namespace namespace is a Namespace")
 def test_namespace_namespace_is_a_namespace(value, exception):
+    pass
+
+
+@mark.parametrize(
+    ["value", "exception"],
+    [(NamespaceKind.GROUP, None), ("foo", TypeError), (1, TypeError)],
+)
+@scenario("../features/describe.feature", "A Namespace kind is a NamespaceKind")
+def test_namespace_kind_is_a_namespacekind(value, exception):
     pass
 
 

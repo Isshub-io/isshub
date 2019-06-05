@@ -35,3 +35,15 @@ Feature: Describing a Namespace
     Scenario: A Namespace namespace can be None
         Given a Namespace
         Then its namespace can be None
+
+    Scenario: A Namespace has a kind
+        Given a Namespace
+        Then it must have a field named kind
+
+    Scenario: A Namespace kind is a NamespaceKind
+        Given a Namespace
+        Then its kind must be a NamespaceKind
+
+    Scenario: A Namespace kind cannot be None
+        Given a Namespace
+        Then its kind cannot be None
