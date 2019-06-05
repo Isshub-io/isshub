@@ -24,6 +24,18 @@ Feature: Describing a Namespace
         Given a Namespace
         Then its name cannot be None
 
+    Scenario: A Namespace has a description
+        Given a Namespace
+        Then it must have a field named description
+
+    Scenario: A Namespace description is a string
+        Given a Namespace
+        Then its description must be a string
+
+    Scenario: A Namespace description can be None
+        Given a Namespace
+        Then its description can be None
+
     Scenario: A Namespace has a namespace
         Given a Namespace
         Then it must have a field named namespace

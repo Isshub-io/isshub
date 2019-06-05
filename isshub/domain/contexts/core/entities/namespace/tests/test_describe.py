@@ -47,6 +47,12 @@ def test_namespace_kind_is_a_namespacekind(value, exception):
     pass
 
 
+@mark.parametrize(["value", "exception"], string_only)
+@scenario("../features/describe.feature", "A Namespace description is a string")
+def test_namespace_description_is_a_string(value, exception):
+    pass
+
+
 scenarios("../features/describe.feature")
 
 

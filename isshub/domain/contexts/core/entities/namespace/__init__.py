@@ -38,12 +38,15 @@ class _Namespace(BaseModelWithId):
         Where the namespace can be found.
     kind : NamespaceKind
         The kind of namespace.
+    description : Optional[str]
+        The description of the namespace.
 
     """
 
     name: str = required_field(str)  # type: ignore
     namespace = None
     kind: NamespaceKind = required_field(NamespaceKind)  # type: ignore
+    description: str = optional_field(str)  # type: ignore
 
 
 @validated()  # type: ignore
@@ -60,6 +63,8 @@ class Namespace(_Namespace):
         Where the namespace can be found.
     kind : NamespaceKind
         The kind of namespace.
+    description : Optional[str]
+        The description of the namespace.
 
     """
 
