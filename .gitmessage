@@ -1,4 +1,5 @@
 type(scope): Short description (72 chars max for line)
+# `(scope)` is optional and `type` is one of: build, ci, chore, docs, feat, fix, merge, perf, refactor, revert, style, tests [remove this line when done]
 
 Abstract
 ========
