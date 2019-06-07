@@ -31,6 +31,7 @@ dev-upgrade:  ## Upgrade all default+dev dependencies defined in setup.cfg
 
 .PHONY: dist
 dist:  ## Build the package
+dist: clean
 	@echo "$(BOLD)Building package$(RESET)"
 	@python setup.py sdist bdist_wheel
 
@@ -65,6 +66,12 @@ tests:  ## Run tests for the isshub project.
 	@echo "$(BOLD)Running tests$(RESET)"
 	@## we ignore error 5 from pytest meaning there is no test to run
 	@pytest || ( ERR=$$?; if [ $${ERR} -eq 5 ]; then (exit 0); else (exit $${ERR}); fi )
+
+.PHONY: tests-nocov
+tests-nocov:  ## Run tests for the isshub project without coverage.
+	@echo "$(BOLD)Running tests (without coverage)$(RESET)"
+	@## we ignore error 5 from pytest meaning there is no test to run
+	@pytest --no-cov || ( ERR=$$?; if [ $${ERR} -eq 5 ]; then (exit 0); else (exit $${ERR}); fi )
 
 .PHONY: lint
 lint:  ## Run all linters (check-isort, check-black, mypy, flake8, pylint)
