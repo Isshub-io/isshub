@@ -140,7 +140,7 @@ class RepositoryMining(RepositoryMiningBase):
             raise Exception("The path to the repo has to be of type 'string'")
 
     def get_git_repo(self):
-        path_repo = self._path_to_repo
+        path_repo = self._path_to_repo[0]
 
         if self._isremote(path_repo):
             # save in `self` to avoid premature destruction of the tmp directory

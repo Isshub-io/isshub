@@ -54,6 +54,12 @@ doc:  clean-doc ## Build the documentation
 	@echo "$(BOLD)Building documentation$(RESET)"
 	@cd docs && $(MAKE) html
 
+.PHONY: doc-strict docs-strict
+docs-strict: doc-strict  # we allow "doc-strict" and "docs-strict"
+doc-strict:  clean-doc ## Build the documentation but fail if a warning
+	@echo "$(BOLD)Building documentation (strict)$(RESET)"
+	@cd docs && sphinx-build -W -b html . _build
+
 .PHONY: clean-docs
 clean-docs: clean-doc  # we allow "clean-doc" and "clean-docs"
 clean-doc:  ## Clean the documentation directories
