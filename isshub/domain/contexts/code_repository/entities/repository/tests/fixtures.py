@@ -1,4 +1,4 @@
-"""Module defining fixtures for the Repository core entity."""
+"""Module defining fixtures for the Repository code_repository entity."""
 
 
 from pytest import fixture

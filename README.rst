@@ -468,10 +468,10 @@ The contexts hold some entities, objects that have a distinct identity.
 
 The contexts are:
 
-core
+code_repository
 ''''
 
-The `core` context will hold the "core" domain, around repositories, issues, code requests...
+The `code_repository` context will hold things around repositories, issues, code requests...
 
 Its entities are:
 

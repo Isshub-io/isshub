@@ -1,4 +1,4 @@
-"""Module holding BDD tests for isshub Repository core entity."""
+"""Module holding BDD tests for isshub Repository code_repository entity."""
 
 import pytest
 from pytest import mark

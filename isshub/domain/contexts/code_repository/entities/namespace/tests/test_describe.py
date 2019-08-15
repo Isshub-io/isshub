@@ -1,10 +1,10 @@
-"""Module holding BDD tests for isshub Namespace core entity."""
+"""Module holding BDD tests for isshub Namespace code_repository entity."""
 
 import pytest
 from pytest import mark
 from pytest_bdd import given, parsers, scenario, scenarios, then
 
-from isshub.domain.contexts.core.entities.namespace import NamespaceKind
+from isshub.domain.contexts.code_repository.entities.namespace import NamespaceKind
 from isshub.domain.utils.testing.validation import (
     check_field,
     check_field_not_nullable,

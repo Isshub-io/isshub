@@ -1,11 +1,11 @@
-"""Module defining fixtures for the Namespace core entity."""
+"""Module defining fixtures for the Namespace code_repository entity."""
 
 
 from typing import Type
 
 from pytest import fixture
 
-from isshub.domain.contexts.core.entities.namespace import Namespace
+from isshub.domain.contexts.code_repository.entities.namespace import Namespace
 
 from .factories import NamespaceFactory
 

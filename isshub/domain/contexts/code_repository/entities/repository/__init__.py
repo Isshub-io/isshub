@@ -1,6 +1,6 @@
 """Package defining the ``Repository`` entity."""
 
-from isshub.domain.contexts.core.entities.namespace import Namespace
+from isshub.domain.contexts.code_repository.entities.namespace import Namespace
 from isshub.domain.utils.entity import BaseModelWithId, required_field, validated
 
 

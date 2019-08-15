@@ -1,4 +1,4 @@
-"""Package to handle isshub entities for domain core context."""
+"""Package to handle isshub entities for domain code_repository context."""
 
 # Order is important so we disable isort for this file
 # isort:skip_file
