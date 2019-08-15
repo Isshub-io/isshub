@@ -18,6 +18,6 @@ class NamespaceFactory(factory.Factory):
 
         model = Namespace
 
-    id = factory.Faker("pyint", min=1)
+    id = factory.Faker("pyint", min_value=1)
     name = factory.Faker("pystr", min_chars=2)
     kind = factory.Faker("enum", enum_cls=NamespaceKind)

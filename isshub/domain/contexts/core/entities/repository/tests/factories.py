@@ -15,6 +15,6 @@ class RepositoryFactory(factory.Factory):
 
         model = Repository
 
-    id = factory.Faker("pyint", min=1)
+    id = factory.Faker("pyint", min_value=1)
     name = factory.Faker("pystr", min_chars=2)
     namespace = factory.SubFactory(NamespaceFactory)
