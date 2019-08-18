@@ -154,7 +154,7 @@ class BaseModelWithId(BaseModel):
     id: int = required_field(int)
 
     @field_validator(id)
-    def id_is_positive_integer(  # noqa  # pylint: disable=unused-argument
+    def validate_id_is_positive_integer(  # noqa  # pylint: disable=unused-argument
         self, field, value
     ):
         """Validate that the ``id`` field is a positive integer.
