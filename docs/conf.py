@@ -123,17 +123,34 @@ def run_apidoc(_):
     )
 
 
+def run_git_to_sphinx():
+    """Add git content into doc"""
+
+    update_remote_branches_env_var = "GIT_TO_SPHINX_UPDATE_BRANCHES"
+    update_remote_branches = os.environ.get(update_remote_branches_env_var)
+    if os.environ.get("READTHEDOCS"):
+        os.environ[update_remote_branches_env_var] = "TRUE"
+
+    try:
+        current_dir = os.path.dirname(__file__)
+        subprocess.run(
+            [
+                os.path.join(current_dir, "git_to_sphinx.py"),
+                os.path.normpath(os.path.join(current_dir, "..")),
+                os.path.normpath(os.path.join(current_dir, "source")),
+            ]
+        )
+    finally:
+        if not update_remote_branches and os.environ.get(
+            update_remote_branches_env_var
+        ):
+            del os.environ[update_remote_branches_env_var]
+
+
 def setup(app):
     # Run apidoc
     app.connect("builder-inited", run_apidoc)
     # Add custom css/js for rtd template
     app.add_css_file("css/custom.css")
     app.add_js_file("js/custom.js")
-    # Add git content into doc
-    current_dir = os.path.dirname(__file__)
-    subprocess.run(
-        [
-            os.path.join(current_dir, "git_to_sphinx.py"),
-            os.path.normpath(os.path.join(current_dir, "..")),
-        ]
-    )
+    run_git_to_sphinx()

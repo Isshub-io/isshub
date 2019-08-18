@@ -152,7 +152,7 @@ jobs:
           name: Build documentation
           command: |
             source ~/venv/bin/activate
-            make doc-strict
+            GIT_TO_SPHINX_UPDATE_BRANCHES=TRUE make doc-strict
 
   # run check and tests for every commit in the history for which it is not already done
   check_every_commit:

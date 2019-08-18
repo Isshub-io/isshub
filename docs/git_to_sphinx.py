@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# Set env `GIT_TO_SPHINX_UPDATE_BRANCHES` to other than empty string to update the remote branches
+# Careful: in dev environment it will reset all your local branches if they diverged from the
+# remove ones
+
 import os
 import re
 import shutil
@@ -144,42 +148,45 @@ class RepositoryMining(RepositoryMiningBase):
         # we need to fetch all branches:
         repo = git_repo.repo
 
-        # get remote branches not fetched yet
-        existing_branches = {
-            branch.name: branch.commit.hexsha for branch in repo.branches
-        }
-        remote_branches = {}
-        for ref_info in repo.remote("origin").fetch():
-            local_ref_name = ref_info.name.split("/", 1)[1]
-            if ref_info.commit.hexsha != existing_branches.get(local_ref_name):
-                remote_branches[local_ref_name] = ref_info.name
+        if os.environ.get("GIT_TO_SPHINX_UPDATE_BRANCHES"):
+            # get remote branches not fetched yet
+            existing_branches = {
+                branch.name: branch.commit.hexsha for branch in repo.branches
+            }
+            remote_branches = {}
+            for ref_info in repo.remote("origin").fetch():
+                local_ref_name = ref_info.name.split("/", 1)[1]
+                if ref_info.commit.hexsha != existing_branches.get(local_ref_name):
+                    remote_branches[local_ref_name] = ref_info.name
 
-        if remote_branches:
-            # save the current head
-            head_detached = repo.head.is_detached
-            if head_detached:
-                current_ref = repo.head.commit
-            else:
-                current_ref = repo.head.ref
+            if remote_branches:
+                # save the current head
+                head_detached = repo.head.is_detached
+                if head_detached:
+                    current_ref = repo.head.commit
+                else:
+                    current_ref = repo.head.ref
 
-            # stash existing updates if needed
-            with override_environ(**GIT_ENVIRON):
-                stashed = "No local changes to save" not in repo.git.stash("save", "-u")
-
-            # fetch remote branches not fetched yet
-            for local_branch_name, remote_branch_name in remote_branches.items():
-                repo.git.checkout("-B", local_branch_name, remote_branch_name)
-
-            # restore previous head
-            if head_detached:
-                repo.git.checkout(current_ref.hexsha)
-            else:
-                current_ref.checkout()
-
-            # and restore previous updates
-            if stashed:
+                # stash existing updates if needed
                 with override_environ(**GIT_ENVIRON):
-                    repo.git.stash("pop")
+                    stashed = "No local changes to save" not in repo.git.stash(
+                        "save", "-u"
+                    )
+
+                # fetch remote branches not fetched yet
+                for local_branch_name, remote_branch_name in remote_branches.items():
+                    repo.git.checkout("-B", local_branch_name, remote_branch_name)
+
+                # restore previous head
+                if head_detached:
+                    repo.git.checkout(current_ref.hexsha)
+                else:
+                    current_ref.checkout()
+
+                # and restore previous updates
+                if stashed:
+                    with override_environ(**GIT_ENVIRON):
+                        repo.git.stash("pop")
 
         # get the branch from the head now that we are sure we have all branches
         git_repo._discover_main_branch(repo)
