@@ -1,3 +1,12 @@
+/* Hide class attributes because they are duplicate of the class vars found by napoleon plugins
+and those vars are more detailed.
+Side effect: If attributes are not defined in docstrings, they won't appear at all.
+ */
+dl.class > dd > dl.field-list ~ dl.attribute {
+	display: None;
+}
+
+/* Handle more levels of entries in the left sidebar */
 .wy-menu-vertical li.toctree-l3.current li.toctree-l4>ul,
 .wy-menu-vertical li.toctree-l4.current li.toctree-l5>ul,
 .wy-menu-vertical li.toctree-l5.current li.toctree-l6>ul,
@@ -24,7 +33,7 @@
 	display: block
 }
 .wy-menu-vertical li.toctree-l4.current li[class*="toctree-l"]>a{
-    padding: .4045em 5.663em;
+	padding: .4045em 5.663em;
 }
 .wy-menu-vertical li.toctree-l5>a{
 	padding-left: 6.663em !important;
@@ -52,12 +61,4 @@
 }
 .wy-menu-vertical li.toctree-l13>a{
 	padding-left: 14.663em !important;
-}
-
-/* Hide class attributes because they are duplicate of the class vars found by napoleon plugins
-and those vars are more detailed.
-Side effect: If attributes are not defined in docstrings, they won't appear at all.
- */
-dl.class > dd > dl.field-list ~ dl.attribute {
-	display: None;
 }
