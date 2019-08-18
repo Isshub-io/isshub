@@ -13,6 +13,7 @@ import rstcheck
 from cached_property import cached_property
 from git.objects.util import from_timestamp
 from pydriller import RepositoryMining as RepositoryMiningBase
+from pydriller.domain.commit import ModificationType
 from pydriller.git_repository import GitRepository as GitRepositoryBase
 
 
@@ -363,9 +364,9 @@ Last update
 {new_path}
 {old_path}
 
-------
-Source
-------
+-----------
+Last source
+-----------
 
 {source_code}
 
@@ -717,25 +718,44 @@ def render_commit_pages(commit, children, branches, tags):
     }
 
 
-def render_file_pages(path, commits_and_modifications, current_tree):
-    commits_and_modifications = [
-        (commit, modification)
-        for commit, modification in commits_and_modifications
-        if not commit.merge
-    ]
+def find_last_source_code(path, change, changes_by_file):
+    commit, modification, parent_change = change
+    if modification.source_code or modification.added or modification.removed:
+        return modification.source_code
+    if parent_change:
+        return find_last_source_code(path, parent_change, changes_by_file)
+    if (
+        modification.change_type == ModificationType.RENAME
+        and modification.old_path
+        and modification.old_path != modification.new_path
+    ):
+        return find_last_source_code(
+            modification.old_path,
+            changes_by_file[modification.old_path][0],
+            changes_by_file,
+        )
+    return None
+
+
+def render_file_pages(path, changes_by_file, current_tree):
+    last_change = changes_by_file[path][0]
+    changes = [change for change in changes_by_file[path] if not change[0].merge]
     modifications = "\n\n".join(
         "\n"
         + render_modification_for_commit_in_path(modification, commit, path).strip()
-        for commit, modification in commits_and_modifications
+        for commit, modification, *__ in changes
     )
-    last_commit, last_modification = commits_and_modifications[0]
-    first_commit, first_modification = commits_and_modifications[-1]
+    last_commit, last_modification = changes[0][:2]
+    first_commit, first_modification = changes[-1][:2]
     basename = os.path.basename(path)
     dirname = os.path.dirname(path)
     suffixed_dirname = dirname + "/"
     title = basename
     if not path_in_tree(path, current_tree):
         title += REMOVED
+    source_code = last_change[1].source_code or find_last_source_code(
+        path, last_change, changes_by_file
+    )
     return {
         f"content/{escape_path(path)}.rst": FILE_PAGE_TEMPLATE.format(
             path=path,
@@ -745,9 +765,9 @@ def render_file_pages(path, commits_and_modifications, current_tree):
             escaped_dirname=escape_path(suffixed_dirname),
             modifications=modifications,
             source_code=SOURCE_CODE_TEMPLATE.format(
-                source_code=indent(last_modification.source_code, "   ")
+                source_code=indent(source_code, "   ")
             )
-            if last_modification.source_code
+            if source_code
             else "(No source code)",
             last_type=MODIFICATION_TYPES[last_modification.change_type.name],
             last_updated_at=format_date(last_commit.committer_date),
@@ -1003,7 +1023,7 @@ def render(location, basepath=BASEPATH, clean=True):
     print("")
 
     print("Rendering commits...", end="")
-    commits_by_file = defaultdict(list)
+    changes_by_file = defaultdict(list)
     nb_commits = len(commits)
     for index, (__, commit) in enumerate(commits.items(), 1):
         print(f"\rRendering commits [{index}/{nb_commits}]", end="")
@@ -1021,9 +1041,19 @@ def render(location, basepath=BASEPATH, clean=True):
         )
         for modification in commit.modifications:
             if modification.new_path:
-                commits_by_file[modification.new_path].append((commit, modification))
+                changes_by_file[modification.new_path].append(
+                    [commit, modification, None]
+                )
             if modification.old_path and modification.old_path != modification.new_path:
-                commits_by_file[modification.old_path].append((commit, modification))
+                changes_by_file[modification.old_path].append(
+                    [commit, modification, None]
+                )
+
+    # link changes to their parent
+    for path, changes in changes_by_file.items():
+        for index, change in enumerate(changes[:-1]):
+            change[2] = changes[index + 1]
+
     print("")
 
     print("Building content tree...", end="")
@@ -1031,9 +1061,9 @@ def render(location, basepath=BASEPATH, clean=True):
     print("\rBuilding content tree [ok]")
 
     print("Rendering files...", end="")
-    nb_files = len(commits_by_file)
+    nb_files = len(changes_by_file)
     dirs = defaultdict(set)
-    for index, path in enumerate(sorted(commits_by_file), 1):
+    for index, path in enumerate(sorted(changes_by_file), 1):
         print(f"\rRendering files [{index}/{nb_files}]", end="")
 
         current, is_dir = path, False
@@ -1047,8 +1077,7 @@ def render(location, basepath=BASEPATH, clean=True):
                 break
 
         render_to_files(
-            render_file_pages(path, commits_by_file[path], current_tree),
-            basepath=basepath,
+            render_file_pages(path, changes_by_file, current_tree), basepath=basepath
         )
     print("")
 
