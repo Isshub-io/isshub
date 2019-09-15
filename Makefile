@@ -49,33 +49,39 @@ full-clean: clean
 	-$(MAKE) clean-doc
 
 .PHONY: doc docs
+doc / docs: ## Build the documentation
 docs: doc  # we allow "doc" and "docs"
-doc:  clean-doc ## Build the documentation
+doc:  clean-doc
 	@echo "$(BOLD)Building documentation$(RESET)"
 	@cd docs && $(MAKE) html
 
 .PHONY: doc-strict docs-strict
+doc-strict / docs-strict:  ## Build the documentation but fail if a warning
 docs-strict: doc-strict  # we allow "doc-strict" and "docs-strict"
-doc-strict:  clean-doc ## Build the documentation but fail if a warning
+doc-strict:  clean-doc
 	@echo "$(BOLD)Building documentation (strict)$(RESET)"
 	@cd docs && sphinx-build -W -b html . _build
 
-.PHONY: clean-docs
+.PHONY: clean-doc clean-docs
+clean-doc / clean-docs:  ## Clean the documentation directories
 clean-docs: clean-doc  # we allow "clean-doc" and "clean-docs"
-clean-doc:  ## Clean the documentation directories
+clean-doc:
 	@echo "$(BOLD)Cleaning documentation directories$(RESET)"
 	@rm -rf docs/source docs/git
 	@cd docs && $(MAKE) clean
 
 .PHONY: tests test
+test / tests:  ## Run tests for the isshub project.
 test: tests  # we allow "test" and "tests"
-tests:  ## Run tests for the isshub project.
+tests:
 	@echo "$(BOLD)Running tests$(RESET)"
 	@## we ignore error 5 from pytest meaning there is no test to run
 	@pytest || ( ERR=$$?; if [ $${ERR} -eq 5 ]; then (exit 0); else (exit $${ERR}); fi )
 
 .PHONY: tests-nocov
-tests-nocov:  ## Run tests for the isshub project without coverage.
+test-nocov / tests-nocov:  ## Run tests for the isshub project without coverage.
+test-nocov: tests-nocov  # we allow "test-nocov" and "tests-nocov"
+tests-nocov:
 	@echo "$(BOLD)Running tests (without coverage)$(RESET)"
 	@## we ignore error 5 from pytest meaning there is no test to run
 	@pytest --no-cov || ( ERR=$$?; if [ $${ERR} -eq 5 ]; then (exit 0); else (exit $${ERR}); fi )
@@ -85,8 +91,8 @@ lint:  ## Run all linters (check-isort, check-black, mypy, flake8, pylint)
 lint: check-isort check-black flake8 pylint mypy
 
 .PHONY: check checks
+check / checks:  ## Run all checkers (lint, tests)
 check: checks
-checks:  ## Run all checkers (lint, tests)
 checks: lint tests check-commit
 
 .PHONY: mypy
