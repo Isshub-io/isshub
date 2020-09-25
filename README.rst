@@ -189,12 +189,6 @@ But we still use lint checkers:
   `flake8-docstrings <https://pypi.org/project/flake8-docstrings/>`_
     A simple module that adds an extension for the fantastic `pydocstyle <http://www.pydocstyle.org>`_ tool to flake8.
 
-  `flake8-imports <https://pypi.org/project/flake8-imports/>`_
-    Flake8 extension to run isort check over the source files.
-
-  `flake8-mypy <https://pypi.org/project/flake8-mypy/>`_
-    A plugin for Flake8 integrating `mypy <http://mypy-lang.org/>`_.
-
   To run `flake8`::
 
     make flake8
@@ -220,7 +214,7 @@ The checks are enforced by `flake8-docstrings`_ for basic docstring presentation
 
 I'll try to use `python typing <https://docs.python.org/3/library/typing.html>`_ while avoiding making things too much complicated. So expect some `# type: ignore` comments here and there, notably on decorators.
 
-The types will be checked by `mypy`_.
+The types will be checked by `mypy <https://mypy.readthedocs.io/>`_.
 
 So, code documentation is important (take that, Django). But it is clearly not enough.
 

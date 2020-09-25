@@ -97,7 +97,7 @@ mypy:  ## Run the mypy tool
 .PHONY: check-isort
 check-isort:  ## Run the isort tool in check mode only (won't modify files)
 	@echo "$(BOLD)Checking isort(RESET)"
-	@isort --check-only 2>&1
+	@isort . --check-only 2>&1
 
 .PHONY: check-black
 check-black:  ## Run the black tool in check mode only (won't modify files)
@@ -121,7 +121,7 @@ pretty: isort black
 .PHONY: isort
 isort:  ## Run the isort tool and update files that need to
 	@echo "$(BOLD)Running isort$(RESET)"
-	@isort --atomic --apply
+	@isort . --atomic
 
 .PHONY: black
 black:  ## Run the black tool and update files that need to

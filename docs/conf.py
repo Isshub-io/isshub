@@ -92,6 +92,8 @@ html_use_old_search_snippets = True
 
 # -- Run apidoc when building the documentation-------------------------------
 
+napoleon_use_ivar = True
+
 
 def run_apidoc(_):
     """Run apidoc on the marsha project and store source doc in ``source`` dir."""

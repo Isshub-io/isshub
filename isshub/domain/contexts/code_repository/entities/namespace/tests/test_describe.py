@@ -56,8 +56,8 @@ def test_namespace_description_is_a_string(value, exception):
 scenarios("../features/describe.feature")
 
 
-@given("a Namespace")
-def namespace(namespace_factory):
+@given("a Namespace", target_fixture="namespace")
+def a_namespace(namespace_factory):
     return namespace_factory()
 
 

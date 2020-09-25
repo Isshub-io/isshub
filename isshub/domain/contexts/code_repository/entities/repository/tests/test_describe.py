@@ -40,8 +40,8 @@ def test_repository_namespace_is_a_namespace(value, exception):
 scenarios("../features/describe.feature")
 
 
-@given("a Repository")
-def repository(repository_factory):
+@given("a Repository", target_fixture="repository")
+def a_repository(repository_factory):
     return repository_factory()
 
 

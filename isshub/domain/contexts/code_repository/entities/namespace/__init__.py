@@ -21,7 +21,7 @@ class NamespaceKind(enum.Enum):
 
 @validated()  # type: ignore
 class _Namespace(BaseModelWithId):
-    """A namespace can contain namespace and repositories.
+    """A namespace can contain namespaces and repositories.
 
     Notes
     -----
@@ -51,7 +51,7 @@ class _Namespace(BaseModelWithId):
 
 @validated()  # type: ignore
 class Namespace(_Namespace):
-    """A namespace can contain namespace and repositories.
+    """A namespace can contain namespaces and repositories.
 
     Attributes
     ----------
@@ -59,7 +59,7 @@ class Namespace(_Namespace):
         The unique identifier of the namespace
     name : str
         The name of the namespace. Unique in its parent namespace.
-    namespace : Optional[str]
+    namespace : Optional[Namespace]
         Where the namespace can be found.
     kind : NamespaceKind
         The kind of namespace.

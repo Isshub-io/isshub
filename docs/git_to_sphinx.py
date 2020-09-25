@@ -96,7 +96,7 @@ class GitRepository(GitRepositoryBase):
         if repo.head.is_detached:
             for branch in repo.branches:
                 if branch.commit.hexsha == repo.head.commit.hexsha:
-                    self.main_branch = branch.name
+                    self._conf.set_value("main_branch", branch.name)
         else:
             super()._discover_main_branch(repo)
 
@@ -104,24 +104,21 @@ class GitRepository(GitRepositoryBase):
     def repo(self):
         return super().repo
 
-    def get_list_tags(self, reverse_order=False):
+    def get_list_tags(self):
         for tag in sorted(
             self.repo.tags,
             key=lambda t: t.commit.committed_datetime,
-            reverse=not reverse_order,
+            reverse=True,
         ):
             yield tag
 
-    def get_list_branches(self, reverse_order=False):
+    def get_list_branches(self):
         for branch in sorted(
             self.repo.branches,
             key=lambda t: t.commit.committed_datetime,
-            reverse=not reverse_order,
+            reverse=True,
         ):
             yield branch
-
-    def get_list_commits(self, branch=None, reverse_order=False):
-        return super().get_list_commits(branch=branch, reverse_order=reverse_order)
 
     def get_list_tree(self, node, parent_path=""):
         for child in node:
@@ -135,17 +132,11 @@ class GitRepository(GitRepositoryBase):
 
 
 class RepositoryMining(RepositoryMiningBase):
-    def _sanity_check_repos(self, path_to_repo):
-        if not isinstance(path_to_repo, str):
-            raise Exception("The path to the repo has to be of type 'string'")
-
     def get_git_repo(self):
-        path_repo = self._path_to_repo[0]
+        path_repo = self._conf.get("path_to_repos")[0]
 
-        if self._isremote(path_repo):
-            # save in `self` to avoid premature destruction of the tmp directory
-            self.tmp_folder = tempfile.TemporaryDirectory()
-            path_repo = self._clone_remote_repos(self.tmp_folder.name, path_repo)
+        if self._is_remote(path_repo):
+            path_repo = self._clone_remote_repo(self._clone_folder(), path_repo)
 
         git_repo = GitRepository(path_repo)
 
@@ -195,24 +186,23 @@ class RepositoryMining(RepositoryMiningBase):
         return git_repo
 
     def __init__(self, path_to_repo):
-        super().__init__(path_to_repo=path_to_repo, reversed_order=True)
+        super().__init__(path_to_repo=path_to_repo, order="reverse")
+
+        if not isinstance(self._conf.get("path_to_repo"), str):
+            raise Exception("The path to the repo has to be of type 'string'")
 
         self.git_repo = self.get_git_repo()
 
     def traverse_tags(self):
-        for tag in self.git_repo.get_list_tags(reverse_order=not self._reversed_order):
+        for tag in self.git_repo.get_list_tags():
             yield tag
 
     def traverse_branches(self):
-        for branch in self.git_repo.get_list_branches(
-            reverse_order=not self._reversed_order
-        ):
+        for branch in self.git_repo.get_list_branches():
             yield branch
 
     def traverse_commits(self, revision=None):
-        for commit in self.git_repo.get_list_commits(
-            branch=revision, reverse_order=not self._reversed_order
-        ):
+        for commit in self.git_repo.get_list_commits(rev=revision, reverse=False):
             yield commit
 
     def traverse_tree(self):
@@ -954,7 +944,8 @@ def render(location, basepath=BASEPATH, clean=True):
     print("  - branches...", end="")
     branches = list(repo.traverse_branches())
     render_to_files(
-        render_branches_pages(branches, repo.git_repo.main_branch), basepath=basepath
+        render_branches_pages(branches, repo.git_repo._conf.get("main_branch")),
+        basepath=basepath,
     )
     print("\r  - branches [ok]")
     print("  - tags...", end="")
@@ -974,7 +965,9 @@ def render(location, basepath=BASEPATH, clean=True):
         print(f"  - {branch.name}...", end="")
         commits = [branch.commit] + list(branch.commit.iter_parents())
         render_to_files(
-            render_branch_pages(branch, commits, repo.git_repo.main_branch),
+            render_branch_pages(
+                branch, commits, repo.git_repo._conf.get("main_branch")
+            ),
             basepath=basepath,
         )
         for commit in commits:
