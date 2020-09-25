@@ -1,9 +1,8 @@
 """Validation helpers for BDD tests for isshub entities."""
 
-from typing import Any, List, Optional, Tuple, Type
+from typing import Any, Callable, List, Optional, Tuple, Type
 
 import pytest
-from factory import Factory
 
 from isshub.domain.utils.entity import BaseModel
 
@@ -49,7 +48,7 @@ def check_field(obj: BaseModel, field_name: str) -> None:
 
 
 def check_field_value(
-    factory: Type[Factory],
+    factory: Callable[..., BaseModel],
     field_name: str,
     value: Any,
     exception: Optional[Type[Exception]],
@@ -59,7 +58,7 @@ def check_field_value(
 
     Parameters
     ----------
-    factory : Type[Factory]
+    factory : Callable[...,BaseModel]
         The factory to use to create the object to test
     field_name : str
         The name of the field to check
@@ -78,10 +77,13 @@ def check_field_value(
         or if no exception is raised if `exception` is not ``None`` (or the wrong exception).
 
     """
+    factory_kwargs_copy = factory_kwargs.copy()
+    factory_kwargs_copy.pop(field_name, None)
+
     if exception:
         # When creating an instance
         with pytest.raises(exception):
-            factory(**{field_name: value}, **factory_kwargs)
+            factory(**{field_name: value}, **factory_kwargs_copy)
         # When updating the value
         obj = factory(**factory_kwargs)
         setattr(obj, field_name, value)
@@ -89,7 +91,7 @@ def check_field_value(
             obj.validate()
     else:
         # When creating an instance
-        factory(**{field_name: value}, **factory_kwargs)
+        factory(**{field_name: value}, **factory_kwargs_copy)
         # When updating the value
         obj = factory(**factory_kwargs)
         setattr(obj, field_name, value)
@@ -97,13 +99,13 @@ def check_field_value(
 
 
 def check_field_not_nullable(
-    factory: Type[Factory], field_name: str, **factory_kwargs: Any
+    factory: Callable[..., BaseModel], field_name: str, **factory_kwargs: Any
 ) -> None:
     """Assert that an object cannot have a specific field set to ``None``.
 
     Parameters
     ----------
-    factory : Type[Factory]
+    factory : Callable[...,BaseModel]
         The factory to use to create the object to test
     field_name : str
         The name of the field to check
@@ -118,8 +120,10 @@ def check_field_not_nullable(
 
     """
     # When creating an instance
+    factory_kwargs_copy = factory_kwargs.copy()
+    factory_kwargs_copy.pop(field_name, None)
     with pytest.raises(TypeError):
-        factory(**{field_name: None}, **factory_kwargs)
+        factory(**{field_name: None}, **factory_kwargs_copy)
 
     # When updating the value
     obj = factory(**factory_kwargs)
@@ -129,13 +133,13 @@ def check_field_not_nullable(
 
 
 def check_field_nullable(
-    factory: Type[Factory], field_name: str, **factory_kwargs: Any
+    factory: Callable[..., BaseModel], field_name: str, **factory_kwargs: Any
 ) -> None:
     """Assert that an object can have a specific field set to ``None``.
 
     Parameters
     ----------
-    factory : Type[Factory]
+    factory : Callable[...,BaseModel]
         The factory to use to create the object to test
     field_name : str
         The name of the field to check
@@ -150,8 +154,10 @@ def check_field_nullable(
 
     """
     # When creating an instance
+    factory_kwargs_copy = factory_kwargs.copy()
+    factory_kwargs_copy.pop(field_name, None)
     try:
-        factory(**{field_name: None}, **factory_kwargs)
+        factory(**{field_name: None}, **factory_kwargs_copy)
     except TypeError:
         pytest.fail(f"DID RAISE {TypeError}")
 
