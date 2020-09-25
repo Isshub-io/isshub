@@ -5,6 +5,33 @@ Side effect: If attributes are not defined in docstrings, they won't appear at a
 dl.class > dd > dl.field-list ~ dl.attribute {
 	display: None;
 }
+/* Package owning the current package/module, placed at the top right of the current package/module */
+.package-owner {
+	float: right;
+}
+/* Hide the real title and instead show our own with more text in it (to avoid polluting toctree with more text) */
+.package-or-module-title {
+	margin-top: 0;
+	font-weight: 700;
+	font-family: "Roboto Slab","ff-tisa-web-pro","Georgia",Arial,sans-serif;
+	font-size: 175%;
+}
+.package-owner ~ .section h1 {
+	display: none;
+}
+/* List of sub-packages/modules of the current package:
+	- Make the title "Subpackages"/"Submodules" not bold, and placed just before the list
+	- Add a left border to the list to make it visually match with the title
+ */
+p.rubric.package-sub {
+	margin-bottom: 0;
+	font-weight: normal;
+}
+p.rubric.package-sub + .toctree-wrapper {
+	border-left: solid #404040 1px;
+	margin-left: 6px;
+	padding-top: 6px;
+}
 
 /* Handle more levels of entries in the left sidebar */
 .wy-menu-vertical li.toctree-l3.current li.toctree-l4>ul,

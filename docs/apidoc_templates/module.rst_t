@@ -1,0 +1,15 @@
+.. rst-class:: package-owner
+
+   in :doc:`{{ basename.split('.')[:-1] | join(".") }} <{{ basename.split('.')[:-1] | join(".") }}>`
+
+{{ basename.split('.')[-1] | e | heading }}
+
+.. rst-class:: package-or-module-title
+
+   {{ ['"', basename.split('.')[-1] | e, '" module'] | join("") }}
+
+.. automodule:: {{ qualname }}
+{%- for option in automodule_options %}
+   :{{ option }}:
+{%- endfor %}
+
