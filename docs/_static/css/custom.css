@@ -36,6 +36,21 @@ p.rubric.package-sub + .toctree-wrapper {
 	margin-left: 6px;
 	padding-top: 6px;
 }
+/* Add emphasis to the first line of docstring of packages and modules */
+.package-or-module-title + .section > span.target:first-of-type + p,  /* package with no content */
+.package-or-module-title + .section > span + h1:first-of-type + p, /* package with content */
+.package-or-module-title ~ span.target:first-of-type + p {  /* module */
+	font-weight: 600;
+	font-style: italic;
+	font-size: larger;
+}
+/* Add emphasis to the first line of docstring of classes, methods and functions */
+dl.class > dd:first-of-type > p:nth-child(2),
+dl.method > dd:first-of-type > p:first-of-type,
+dl.function > dd:first-of-type > p:first-of-type {
+	font-weight: 600;
+	font-style: italic;
+}
 
 /* Handle more levels of entries in the left sidebar */
 .wy-menu-vertical li.toctree-l3.current li.toctree-l4>ul,
