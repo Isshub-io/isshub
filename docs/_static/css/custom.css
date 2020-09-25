@@ -1,3 +1,7 @@
+/* Hide "View page source" link (because it links to source used for search) */
+.wy-breadcrumbs-aside {
+	display: none !important;
+}
 /* Hide class attributes because they are duplicate of the class vars found by napoleon plugins
 and those vars are more detailed.
 Side effect: If attributes are not defined in docstrings, they won't appear at all.
