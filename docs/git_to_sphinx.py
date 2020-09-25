@@ -22,7 +22,10 @@ from pydriller.git_repository import GitRepository as GitRepositoryBase
 
 
 DOC_DIRNAME = "git"
-BASEPATH = os.path.join(os.path.dirname(__file__), DOC_DIRNAME)
+SOURCE_DIRNAME = "source"
+DIRNAME = os.path.dirname(__file__)
+BASEPATH = os.path.join(DIRNAME, DOC_DIRNAME)
+SOURCE_BASE_PATH = os.path.join(DIRNAME, SOURCE_DIRNAME)
 
 REMOVED = " (removed)"
 
@@ -349,6 +352,10 @@ Changes
 
 """
 
+LINK_TO_SOURCE_TEMPLATE = """\
+:doc:`View documentation </{source_dirname}/{python_path}>`
+"""
+
 FILE_PAGE_TEMPLATE = """\
 {title_line}
 {title}
@@ -374,7 +381,7 @@ Last update
 -----------
 Last source
 -----------
-
+{documentation}
 {source_code}
 
 -------
@@ -763,6 +770,17 @@ def render_file_pages(path, changes_by_file, current_tree):
     source_code = last_change[1].source_code or find_last_source_code(
         path, last_change, changes_by_file
     )
+    documentation = ""
+    if path.endswith(".py"):
+        parts = path[:-3].split("/")
+        if parts[-1] == "__init__":
+            parts.pop()
+        python_path = ".".join(parts)
+        if os.path.exists(os.path.join(SOURCE_BASE_PATH, python_path + ".rst")):
+            documentation = LINK_TO_SOURCE_TEMPLATE.format(
+                python_path=python_path, source_dirname=SOURCE_DIRNAME
+            )
+
     return {
         f"content/{escape_path(path)}.rst": FILE_PAGE_TEMPLATE.format(
             path=path,
@@ -788,6 +806,7 @@ def render_file_pages(path, changes_by_file, current_tree):
             new_path=render_new_path(last_modification.new_path, DOC_DIRNAME)
             if last_modification.new_path and last_modification.new_path != path
             else "",
+            documentation=documentation,
             parent_old="" if path_in_tree(dirname, current_tree) else REMOVED,
         )
     }

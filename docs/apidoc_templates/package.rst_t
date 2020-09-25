@@ -15,11 +15,10 @@
 {%- endfor %}
 {%- endmacro %}
 
-
-.. rst-class:: package-owner
+.. rst-class:: package-side-info
 
    {% if '.' in pkgname %}in :doc:`{{ pkgname.split('.')[:-1] | join(".") }} <{{ pkgname.split('.')[:-1] | join(".") }}>`{% else %}(root){% endif %}
-
+   :doc:`View Git history </git/content/{{ pkgname.split('.') | join("/") }}/__init__.py>`
 
 .. rst-class:: package-or-module-title
 

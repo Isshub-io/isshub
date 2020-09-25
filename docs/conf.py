@@ -123,7 +123,7 @@ def run_apidoc(_):
     )
 
 
-def run_git_to_sphinx():
+def run_git_to_sphinx(_):
     """Add git content into doc"""
 
     update_remote_branches_env_var = "GIT_TO_SPHINX_UPDATE_BRANCHES"
@@ -150,7 +150,7 @@ def run_git_to_sphinx():
 def setup(app):
     # Run apidoc
     app.connect("builder-inited", run_apidoc)
+    app.connect("builder-inited", run_git_to_sphinx)
     # Add custom css/js for rtd template
     app.add_css_file("css/custom.css")
     app.add_js_file("js/custom.js")
-    run_git_to_sphinx()

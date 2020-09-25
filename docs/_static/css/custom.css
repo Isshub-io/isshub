@@ -9,9 +9,15 @@ Side effect: If attributes are not defined in docstrings, they won't appear at a
 dl.class > dd > dl.field-list ~ dl.attribute {
 	display: None;
 }
-/* Package owning the current package/module, placed at the top right of the current package/module */
-.package-owner {
+/* Package owning the current package/module and link to git history, placed at the top right of the current package/module */
+.package-side-info {
 	float: right;
+	text-align: right;
+}
+.package-side-info a:nth-child(2) { /* link "view git history", on its own line and smaller */
+	display: block;
+	font-size: smaller;
+	margin-top: 3px;
 }
 /* Hide the real title and instead show our own with more text in it (to avoid polluting toctree with more text) */
 .package-or-module-title {
@@ -20,7 +26,7 @@ dl.class > dd > dl.field-list ~ dl.attribute {
 	font-family: "Roboto Slab","ff-tisa-web-pro","Georgia",Arial,sans-serif;
 	font-size: 175%;
 }
-.package-owner ~ .section h1 {
+.package-side-info ~ .section h1 {
 	display: none;
 }
 /* List of sub-packages/modules of the current package:

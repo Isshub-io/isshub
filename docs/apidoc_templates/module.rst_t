@@ -1,6 +1,7 @@
-.. rst-class:: package-owner
+.. rst-class:: package-side-info
 
    in :doc:`{{ basename.split('.')[:-1] | join(".") }} <{{ basename.split('.')[:-1] | join(".") }}>`
+   :doc:`View Git history </git/content/{{ basename.split('.') | join("/") }}.py>`
 
 {{ basename.split('.')[-1] | e | heading }}
 
