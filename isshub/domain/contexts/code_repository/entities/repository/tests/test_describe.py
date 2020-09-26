@@ -62,6 +62,6 @@ def repository_field_is_of_a_certain_type(
     check_field_value(repository_factory, field_name, value, exception)
 
 
-@then(parsers.parse("its {field_name:w} cannot be none"))
-def repository_field_cannot_be_none(repository_factory, field_name):
+@then(parsers.parse("its {field_name:w} is mandatory"))
+def repository_field_is_mandatory(repository_factory, field_name):
     check_field_not_nullable(repository_factory, field_name)

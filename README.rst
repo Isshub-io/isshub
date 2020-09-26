@@ -376,9 +376,9 @@ And you'll be surprised to see this "BDD" thing used in very unusual case. An ex
         Given a Repository
         Then its name must be a string
 
-    Scenario: A Repository name cannot be None
+    Scenario: A Repository name is mandatory
         Given a Repository
-        Then its name cannot be None
+        Then its name is mandatory
 
 Yes, things like that :)
 

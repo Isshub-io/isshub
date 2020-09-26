@@ -8,9 +8,9 @@ Feature: Describing a Repository
         Given a Repository
         Then its id must be a positive integer
 
-    Scenario: A Repository id cannot be None
+    Scenario: A Repository id is mandatory
         Given a Repository
-        Then its id cannot be None
+        Then its id is mandatory
 
     Scenario: A Repository has a name
         Given a Repository
@@ -20,9 +20,9 @@ Feature: Describing a Repository
         Given a Repository
         Then its name must be a string
 
-    Scenario: A Repository name cannot be None
+    Scenario: A Repository name is mandatory
         Given a Repository
-        Then its name cannot be None
+        Then its name is mandatory
 
     Scenario: A Repository has a namespace
         Given a Repository
@@ -32,6 +32,6 @@ Feature: Describing a Repository
         Given a Repository
         Then its namespace must be a Namespace
 
-    Scenario: A Repository namespace cannot be None
+    Scenario: A Repository namespace is mandatory
         Given a Repository
-        Then its namespace cannot be None
+        Then its namespace is mandatory

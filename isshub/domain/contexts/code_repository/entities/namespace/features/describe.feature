@@ -8,9 +8,9 @@ Feature: Describing a Namespace
         Given a Namespace
         Then its id must be a positive integer
 
-    Scenario: A Namespace id cannot be None
+    Scenario: A Namespace id is mandatory
         Given a Namespace
-        Then its id cannot be None
+        Then its id is mandatory
 
     Scenario: A Namespace has a name
         Given a Namespace
@@ -20,9 +20,9 @@ Feature: Describing a Namespace
         Given a Namespace
         Then its name must be a string
 
-    Scenario: A Namespace name cannot be None
+    Scenario: A Namespace name is mandatory
         Given a Namespace
-        Then its name cannot be None
+        Then its name is mandatory
 
     Scenario: A Namespace has a description
         Given a Namespace
@@ -32,9 +32,9 @@ Feature: Describing a Namespace
         Given a Namespace
         Then its description must be a string
 
-    Scenario: A Namespace description can be None
+    Scenario: A Namespace description is optional
         Given a Namespace
-        Then its description can be None
+        Then its description is optional
 
     Scenario: A Namespace has a namespace
         Given a Namespace
@@ -44,9 +44,9 @@ Feature: Describing a Namespace
         Given a Namespace
         Then its namespace must be a Namespace
 
-    Scenario: A Namespace namespace can be None
+    Scenario: A Namespace namespace is optional
         Given a Namespace
-        Then its namespace can be None
+        Then its namespace is optional
 
     Scenario: A Namespace has a kind
         Given a Namespace
@@ -56,6 +56,6 @@ Feature: Describing a Namespace
         Given a Namespace
         Then its kind must be a NamespaceKind
 
-    Scenario: A Namespace kind cannot be None
+    Scenario: A Namespace kind is mandatory
         Given a Namespace
-        Then its kind cannot be None
+        Then its kind is mandatory

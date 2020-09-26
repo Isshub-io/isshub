@@ -78,11 +78,11 @@ def namespace_field_is_of_a_certain_type(
     check_field_value(namespace_factory, field_name, value, exception)
 
 
-@then(parsers.parse("its {field_name:w} cannot be none"))
-def namespace_field_cannot_be_none(namespace_factory, field_name):
+@then(parsers.parse("its {field_name:w} is mandatory"))
+def namespace_field_is_mandatory(namespace_factory, field_name):
     check_field_not_nullable(namespace_factory, field_name)
 
 
-@then(parsers.parse("its {field_name:w} can be none"))
-def namespace_field_can_be_none(namespace_factory, field_name):
+@then(parsers.parse("its {field_name:w} is optional"))
+def namespace_field_is_optional(namespace_factory, field_name):
     check_field_nullable(namespace_factory, field_name)
