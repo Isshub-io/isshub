@@ -26,6 +26,54 @@ references:
     attach_workspace:
       at: "~/"
 
+  # complete workflow with all jobs with their dependencies
+  full_workflow_jobs: &full_workflow_jobs
+    jobs:
+      - checkout_code
+      - install_code:
+          requires:
+            - checkout_code
+      - check_commit:
+          requires:
+            - install_code
+      - linter_mypy:
+          requires:
+            - install_code
+      - linter_isort:
+          requires:
+            - install_code
+      - linter_black:
+          requires:
+            - install_code
+      - linter_flake8:
+          requires:
+            - install_code
+      - linter_pylint:
+          requires:
+            - install_code
+      - run_tests:
+          requires:
+            - install_code
+      - build_doc:
+          requires:
+            - install_code
+      - check_every_commit:
+          requires:
+            - install_code
+      - build_python_package:
+          requires:
+            - linter_mypy
+            - linter_isort
+            - linter_black
+            - linter_flake8
+            - linter_pylint
+            - run_tests
+      - test_python_package_whl:
+          requires:
+            - build_python_package
+      - test_python_package_targz:
+          requires:
+            - build_python_package
 
 # jobs definition: they are used in ``workflows``
 jobs:
@@ -242,51 +290,14 @@ jobs:
 
 workflows:
   version: 2
-
-  isshub:
-    jobs:
-      - checkout_code
-      - install_code:
-          requires:
-            - checkout_code
-      - check_commit:
-          requires:
-            - install_code
-      - linter_mypy:
-          requires:
-            - install_code
-      - linter_isort:
-          requires:
-            - install_code
-      - linter_black:
-          requires:
-            - install_code
-      - linter_flake8:
-          requires:
-            - install_code
-      - linter_pylint:
-          requires:
-            - install_code
-      - run_tests:
-          requires:
-            - install_code
-      - build_doc:
-          requires:
-            - install_code
-      - check_every_commit:
-          requires:
-            - install_code
-      - build_python_package:
-          requires:
-            - linter_mypy
-            - linter_isort
-            - linter_black
-            - linter_flake8
-            - linter_pylint
-            - run_tests
-      - test_python_package_whl:
-          requires:
-            - build_python_package
-      - test_python_package_targz:
-          requires:
-            - build_python_package
+  full_workflow_on_push:
+    <<: *full_workflow_jobs
+  full_workflow_nightly:
+    <<: *full_workflow_jobs
+    triggers:
+      - schedule:
+          cron: "12 3 * * *" # Everyday at 3:21 am
+          filters:
+            branches:
+              only:
+                - develop
