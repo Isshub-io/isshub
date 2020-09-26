@@ -86,3 +86,53 @@ def namespace_field_is_mandatory(namespace_factory, field_name):
 @then(parsers.parse("its {field_name:w} is optional"))
 def namespace_field_is_optional(namespace_factory, field_name):
     check_field_nullable(namespace_factory, field_name)
+
+
+@scenario("../features/describe.feature", "A Namespace cannot be contained in itself")
+def test_namespace_namespace_cannot_be_itself():
+    pass
+
+
+@then("its namespace cannot be itself")
+def namespace_namespace_cannot_be_itself(namespace):
+    namespace.namespace = namespace
+    with pytest.raises(ValueError):
+        namespace.validate()
+
+
+@scenario("../features/describe.feature", "A Namespace namespace cannot be in a loop")
+def test_namespace_namespace_cannot_be_in_a_loop():
+    pass
+
+
+@given("a second Namespace", target_fixture="namespace2")
+def a_second_namespace(namespace_factory):
+    return namespace_factory()
+
+
+@given("a third Namespace", target_fixture="namespace3")
+def a_third_namespace(namespace_factory):
+    return namespace_factory()
+
+
+@then("we cannot create a relationships loop with these namespaces")
+def namespace_relationships_cannot_create_a_loop(namespace, namespace2, namespace3):
+    namespace2.namespace = namespace3
+    namespace3.validate()
+    namespace2.validate()
+    namespace.validate()
+    namespace.namespace = namespace2
+    namespace3.validate()
+    namespace2.validate()
+    namespace.validate()
+    namespace3.namespace = namespace
+    with pytest.raises(ValueError):
+        namespace3.validate()
+    with pytest.raises(ValueError):
+        namespace2.validate()
+    with pytest.raises(ValueError):
+        namespace.validate()
+    namespace3.namespace = None
+    namespace3.validate()
+    namespace2.validate()
+    namespace.validate()
