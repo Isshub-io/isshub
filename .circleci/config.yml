@@ -6,7 +6,7 @@ references:
   python_only_config: &python_only_config
     working_directory: ~/isshub
     docker:
-      - image: circleci/python:3.7.3
+      - image: circleci/python:3.8.5
 
   # build steps to save/restore the directory used by pip to cache downloaded packages
   save_pip_cache: &save_pip_cache
