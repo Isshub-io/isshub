@@ -125,6 +125,11 @@ Tools
 
 All tools are incorporated in a `Makefile`, so it's easier to run commands. Tools listed below all have at least one `make` command to run them.
 
+.. note::
+
+   Run `make help` to list the available commands (the first one to run in a fresh python virtual environment being `make dev`)
+
+
 Linting
 =======
 

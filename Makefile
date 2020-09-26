@@ -19,15 +19,9 @@ install:  ## Install the project in the current environment, with its dependenci
 
 .PHONY: dev
 dev:  ## Install the project in the current environment, with its dependencies, including the ones needed in a development environment
-	@echo "$(BOLD)Installing $(PROJECT_NAME) $(PROJECT_VERSION) in dev mode$(RESET)"
-	@pip install -e .[dev,tests,lint,docs]
-	@$(MAKE) full-clean
-
-.PHONY: dev-upgrade
-dev-upgrade:  ## Upgrade all default+dev dependencies defined in setup.cfg
-	@pip install --upgrade pip
-	@pip install --upgrade `python -c 'import setuptools; o = setuptools.config.read_configuration("setup.cfg")["options"]; print(" ".join(o["install_requires"] + o["extras_require"]["dev"] + o["extras_require"]["tests"] + o["extras_require"]["lint"] + o["extras_require"]["docs"]))'`
-	@pip install -e .
+	@echo "$(BOLD)Installing (or upgrading) $(PROJECT_NAME) $(PROJECT_VERSION) in dev mode (with all dependencies)$(RESET)"
+	@pip install --upgrade pip setuptools
+	@pip install --upgrade -e .[dev,tests,lint,docs]
 	@$(MAKE) full-clean
 
 .PHONY: dist
