@@ -42,6 +42,10 @@ p.rubric.package-sub + .toctree-wrapper {
 	margin-left: 6px;
 	padding-top: 6px;
 }
+div#packages > h1 + .toctree-wrapper ul ul, p.package-sub  + .toctree-wrapper ul ul {
+    margin-top: 0;
+    margin-bottom: 0;
+}
 /* Add emphasis to the first line of docstring of packages and modules */
 .package-or-module-title + .section > span.target:first-of-type + p,  /* package with no content */
 .package-or-module-title + .section > span + h1:first-of-type + p, /* package with content */

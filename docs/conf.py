@@ -111,6 +111,8 @@ def run_apidoc(_):
             "--force",
             "--module-first",
             "--separate",
+            "-d",  # maxdepth
+            "6",
             "--doc-project",
             "Packages",
             "--templatedir",
