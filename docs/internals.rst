@@ -6,4 +6,4 @@ IssHub internals
   :maxdepth: 2
 
    Git repository <git/index>
-   Python modules <source/modules>
+   Packages <source/modules>

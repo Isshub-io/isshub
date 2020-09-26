@@ -1,0 +1,16 @@
+.. rst-class:: package-side-info
+
+   in :doc:`{{ basename.split('.')[:-1] | join(".") }} <{{ basename.split('.')[:-1] | join(".") }}>`
+   :doc:`View Git history </git/content/{{ basename.split('.') | join("/") }}.py>`
+
+{{ basename.split('.')[-1] | e | heading }}
+
+.. rst-class:: package-or-module-title
+
+   {{ ['"', basename.split('.')[-1] | e, '" module'] | join("") }}
+
+.. automodule:: {{ qualname }}
+{%- for option in automodule_options %}
+   :{{ option }}:
+{%- endfor %}
+

@@ -1,3 +1,68 @@
+/* Hide "View page source" link (because it links to source used for search) */
+.wy-breadcrumbs-aside {
+	display: none !important;
+}
+/* Hide class attributes because they are duplicate of the class vars found by napoleon plugins
+and those vars are more detailed.
+Side effect: If attributes are not defined in docstrings, they won't appear at all.
+ */
+dl.class > dd > dl.field-list ~ dl.attribute {
+	display: None;
+}
+/* Package owning the current package/module and link to git history, placed at the top right of the current package/module */
+.package-side-info {
+	float: right;
+	text-align: right;
+}
+.package-side-info a:nth-child(2) { /* link "view git history", on its own line and smaller */
+	display: block;
+	font-size: smaller;
+	margin-top: 3px;
+}
+/* Hide the real title and instead show our own with more text in it (to avoid polluting toctree with more text) */
+.package-or-module-title {
+	margin-top: 0;
+	font-weight: 700;
+	font-family: "Roboto Slab","ff-tisa-web-pro","Georgia",Arial,sans-serif;
+	font-size: 175%;
+}
+.package-side-info ~ .section h1 {
+	display: none;
+}
+/* List of sub-packages/modules of the current package:
+	- Make the title "Subpackages"/"Submodules" not bold, and placed just before the list
+	- Add a left border to the list to make it visually match with the title
+ */
+p.rubric.package-sub {
+	margin-bottom: 0;
+	font-weight: normal;
+}
+p.rubric.package-sub + .toctree-wrapper {
+	border-left: solid #404040 1px;
+	margin-left: 6px;
+	padding-top: 6px;
+}
+div#packages > h1 + .toctree-wrapper ul ul, p.package-sub  + .toctree-wrapper ul ul {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+/* Add emphasis to the first line of docstring of packages and modules */
+.package-or-module-title + .section > span.target:first-of-type + p,  /* package with no content */
+.package-or-module-title + .section > span + h1:first-of-type + p, /* package with content */
+.package-or-module-title ~ span.target:first-of-type + p {  /* module */
+	font-weight: 600;
+	font-style: italic;
+	font-size: larger;
+}
+/* Add emphasis to the first line of docstring of classes, methods and functions */
+dl.class > dd:first-of-type > p:nth-child(2),
+dl.method > dd:first-of-type > p:first-of-type,
+dl.function > dd:first-of-type > p:first-of-type {
+	font-weight: 600;
+	font-style: italic;
+}
+
+/* Handle more levels of entries in the left sidebar */
 .wy-menu-vertical li.toctree-l3.current li.toctree-l4>ul,
 .wy-menu-vertical li.toctree-l4.current li.toctree-l5>ul,
 .wy-menu-vertical li.toctree-l5.current li.toctree-l6>ul,
@@ -24,7 +89,7 @@
 	display: block
 }
 .wy-menu-vertical li.toctree-l4.current li[class*="toctree-l"]>a{
-    padding: .4045em 5.663em;
+	padding: .4045em 5.663em;
 }
 .wy-menu-vertical li.toctree-l5>a{
 	padding-left: 6.663em !important;
@@ -52,12 +117,4 @@
 }
 .wy-menu-vertical li.toctree-l13>a{
 	padding-left: 14.663em !important;
-}
-
-/* Hide class attributes because they are duplicate of the class vars found by napoleon plugins
-and those vars are more detailed.
-Side effect: If attributes are not defined in docstrings, they won't appear at all.
- */
-dl.class > dd > dl.field-list ~ dl.attribute {
-	display: None;
 }
