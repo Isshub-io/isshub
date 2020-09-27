@@ -12,6 +12,10 @@ Feature: Describing a Namespace
         Given a Namespace
         Then its id is mandatory
 
+    Scenario: A Namespace id cannot be changed
+        Given a Namespace
+        Then its id cannot be changed
+
     Scenario: A Namespace has a name
         Given a Namespace
         Then it must have a field named name

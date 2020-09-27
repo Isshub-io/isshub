@@ -5,6 +5,7 @@ from pytest import mark
 from pytest_bdd import given, parsers, scenario, scenarios, then
 
 from isshub.domain.utils.testing.validation import (
+    FrozenAttributeError,
     check_field,
     check_field_not_nullable,
     check_field_value,
@@ -65,3 +66,14 @@ def repository_field_is_of_a_certain_type(
 @then(parsers.parse("its {field_name:w} is mandatory"))
 def repository_field_is_mandatory(repository_factory, field_name):
     check_field_not_nullable(repository_factory, field_name)
+
+
+@scenario("../features/describe.feature", "A Repository id cannot be changed")
+def test_repository_id_cannot_be_changed():
+    pass
+
+
+@then("its id cannot be changed")
+def repository_id_cannot_be_changed(repository):
+    with pytest.raises(FrozenAttributeError):
+        repository.id = repository.id + 1

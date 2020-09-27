@@ -6,6 +6,7 @@ from pytest_bdd import given, parsers, scenario, scenarios, then
 
 from isshub.domain.contexts.code_repository.entities.namespace import NamespaceKind
 from isshub.domain.utils.testing.validation import (
+    FrozenAttributeError,
     check_field,
     check_field_not_nullable,
     check_field_nullable,
@@ -86,6 +87,17 @@ def namespace_field_is_mandatory(namespace_factory, field_name):
 @then(parsers.parse("its {field_name:w} is optional"))
 def namespace_field_is_optional(namespace_factory, field_name):
     check_field_nullable(namespace_factory, field_name)
+
+
+@scenario("../features/describe.feature", "A Namespace id cannot be changed")
+def test_namespace_id_cannot_be_changed():
+    pass
+
+
+@then("its id cannot be changed")
+def namespace_id_cannot_be_changed(namespace):
+    with pytest.raises(FrozenAttributeError):
+        namespace.id = namespace.id + 1
 
 
 @scenario("../features/describe.feature", "A Namespace cannot be contained in itself")

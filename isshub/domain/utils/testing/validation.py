@@ -4,6 +4,8 @@ from typing import Any, Callable, List, Optional, Tuple, Type
 
 import pytest
 
+from attr.exceptions import FrozenAttributeError
+
 from isshub.domain.utils.entity import BaseModel
 
 
@@ -86,16 +88,24 @@ def check_field_value(
             factory(**{field_name: value}, **factory_kwargs_copy)
         # When updating the value
         obj = factory(**factory_kwargs)
-        setattr(obj, field_name, value)
-        with pytest.raises(exception):
-            obj.validate()
+        try:
+            setattr(obj, field_name, value)
+        except FrozenAttributeError:
+            pass
+        else:
+            with pytest.raises(exception):
+                obj.validate()
     else:
         # When creating an instance
         factory(**{field_name: value}, **factory_kwargs_copy)
         # When updating the value
         obj = factory(**factory_kwargs)
-        setattr(obj, field_name, value)
-        obj.validate()
+        try:
+            setattr(obj, field_name, value)
+        except FrozenAttributeError:
+            pass
+        else:
+            obj.validate()
 
 
 def check_field_not_nullable(
@@ -127,9 +137,13 @@ def check_field_not_nullable(
 
     # When updating the value
     obj = factory(**factory_kwargs)
-    setattr(obj, field_name, None)
-    with pytest.raises(TypeError):
-        obj.validate()
+    try:
+        setattr(obj, field_name, None)
+    except FrozenAttributeError:
+        pass
+    else:
+        with pytest.raises(TypeError):
+            obj.validate()
 
 
 def check_field_nullable(
@@ -163,8 +177,12 @@ def check_field_nullable(
 
     # When updating the value
     obj = factory(**factory_kwargs)
-    setattr(obj, field_name, None)
     try:
-        obj.validate()
-    except TypeError:
-        pytest.fail(f"DID RAISE {TypeError}")
+        setattr(obj, field_name, None)
+    except FrozenAttributeError:
+        pass
+    else:
+        try:
+            obj.validate()
+        except TypeError:
+            pytest.fail(f"DID RAISE {TypeError}")
