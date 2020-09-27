@@ -74,7 +74,9 @@ instance/
 docs/_build/
 # Doc from code
 docs/source/
-# Got 2 RST
+# Doc from bdd features
+docs/bdd/
+# Git 2 RST
 docs/git/
 
 # PyBuilder

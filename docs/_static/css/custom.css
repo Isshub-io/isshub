@@ -2,6 +2,11 @@
 .wy-breadcrumbs-aside {
 	display: none !important;
 }
+/* Reduce vertical white space in toc trees */
+.toctree-wrapper ul ul {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
 /* Hide class attributes because they are duplicate of the class vars found by napoleon plugins
 and those vars are more detailed.
 Side effect: If attributes are not defined in docstrings, they won't appear at all.
@@ -41,10 +46,6 @@ p.rubric.package-sub + .toctree-wrapper {
 	border-left: solid #404040 1px;
 	margin-left: 6px;
 	padding-top: 6px;
-}
-div#packages > h1 + .toctree-wrapper ul ul, p.package-sub  + .toctree-wrapper ul ul {
-    margin-top: 0;
-    margin-bottom: 0;
 }
 /* Add emphasis to the first line of docstring of packages and modules */
 .package-or-module-title + .section > span.target:first-of-type + p,  /* package with no content */

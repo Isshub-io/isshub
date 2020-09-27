@@ -97,7 +97,7 @@ add_module_names = False
 
 
 def run_apidoc(_):
-    """Run apidoc on the marsha project and store source doc in ``source`` dir."""
+    """Run apidoc on the project and store source doc in ``source`` dir."""
 
     current_dir = os.path.dirname(__file__)
 
@@ -114,7 +114,7 @@ def run_apidoc(_):
             "-d",  # maxdepth
             "6",
             "--doc-project",
-            "Packages",
+            "Python packages",
             "--templatedir",
             os.path.join(current_dir, "apidoc_templates"),
             "--output-dir",
@@ -122,6 +122,26 @@ def run_apidoc(_):
             source_path,
         ]
         + exclude_paths
+    )
+
+
+def run_gherkindoc(_):
+    """Run gherkindoc on the project and store bdd doc in ``bdd`` dir."""
+
+    current_dir = os.path.dirname(__file__)
+
+    output_path = os.path.join(current_dir, "bdd")
+    source_path = os.path.normpath(os.path.join(current_dir, "..", "isshub"))
+    subprocess.run(
+        [
+            "sphinx-gherkindoc",
+            source_path,
+            output_path,
+            "--toc-name",
+            "index",
+            "--maxtocdepth",
+            "5",
+        ]
     )
 
 
@@ -152,7 +172,9 @@ def run_git_to_sphinx(_):
 def setup(app):
     # Run apidoc
     app.connect("builder-inited", run_apidoc)
+    app.connect("builder-inited", run_gherkindoc)
     app.connect("builder-inited", run_git_to_sphinx)
     # Add custom css/js for rtd template
     app.add_css_file("css/custom.css")
+    app.add_css_file("css/gherkin.css")
     app.add_js_file("js/custom.js")

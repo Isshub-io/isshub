@@ -61,7 +61,7 @@ clean-doc / clean-docs:  ## Clean the documentation directories
 clean-docs: clean-doc  # we allow "clean-doc" and "clean-docs"
 clean-doc:
 	@echo "$(BOLD)Cleaning documentation directories$(RESET)"
-	@rm -rf docs/source docs/git
+	@rm -rf docs/source docs/git docs/bdd
 	@cd docs && $(MAKE) clean
 
 .PHONY: tests test

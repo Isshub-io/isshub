@@ -6,4 +6,5 @@ Welcome to IssHub's documentation!
   :maxdepth: 2
 
    About <about>
+   Specifications <bdd/index>
    Internals <internals>
