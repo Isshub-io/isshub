@@ -12,6 +12,10 @@ Feature: Describing a Repository
         Given a Repository
         Then its id is mandatory
 
+    Scenario: A Repository id cannot be changed
+        Given a Repository
+        Then its id cannot be changed
+
     Scenario: A Repository has a name
         Given a Repository
         Then it must have a field named name

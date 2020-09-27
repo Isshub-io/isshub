@@ -41,13 +41,17 @@ def optional_field(field_type):
     )
 
 
-def required_field(field_type):
+def required_field(field_type, frozen=False):
     """Define a required field of the specified `field_type`.
 
     Parameters
     ----------
     field_type : type
-        The expected type of the field..
+        The expected type of the field.
+    frozen : bool
+        If set to ``False`` (the default), the field can be updated after being set at init time.
+        If set to ``True``, the field can be set at init time but cannot be changed later, else a
+        ``FrozenAttributeError`` exception will be raised.
 
     Returns
     -------
@@ -66,7 +70,11 @@ def required_field(field_type):
     >>> check_field_not_nullable(MyModel, 'my_field', my_field='foo')
 
     """
-    return attr.ib(validator=attr.validators.instance_of(field_type))
+    kwargs = {"validator": attr.validators.instance_of(field_type)}
+    if frozen:
+        kwargs["on_setattr"] = attr.setters.frozen
+
+    return attr.ib(**kwargs)
 
 
 def validated():
@@ -283,7 +291,7 @@ class BaseModelWithId(BaseModel):
 
     """
 
-    id: int = required_field(int)
+    id: int = required_field(int, frozen=True)
 
     @field_validator(id)
     def validate_id_is_positive_integer(  # noqa  # pylint: disable=unused-argument

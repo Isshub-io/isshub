@@ -1,10 +1,11 @@
 """Package defining the ``Namespace`` entity."""
 
 import enum
-from typing import Optional
+from typing import Any, Optional
 
 from isshub.domain.utils.entity import (
     BaseModelWithId,
+    field_validator,
     optional_field,
     required_field,
     validated,
@@ -69,3 +70,34 @@ class Namespace(_Namespace):
     """
 
     namespace: Optional[_Namespace] = optional_field(_Namespace)  # type: ignore
+
+    @field_validator(namespace)  # type: ignore
+    def validate_namespace_is_not_in_a_loop(  # noqa  # pylint: disable=unused-argument
+        self, field: Any, value: Any
+    ) -> None:
+        """Validate that the ``namespace`` field is not in a loop.
+
+        Being in a loop means that one of the descendants is the parent of one of the ascendants.
+
+        Parameters
+        ----------
+        field : Any
+            The field to validate. Passed via the ``@field_validator`` decorator.
+        value : Any
+            The value to validate for the `field`.
+
+        Raises
+        ------
+        ValueError
+            If the given namespace (`value`) is in a loop
+
+        """
+        if not value:
+            return
+
+        parent = value
+        while parent := parent.namespace:
+            if parent == value:
+                raise ValueError(
+                    f"{self.__class__.__name__}.namespace cannot be in a loop"
+                )

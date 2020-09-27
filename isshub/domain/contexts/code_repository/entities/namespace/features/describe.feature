@@ -12,6 +12,10 @@ Feature: Describing a Namespace
         Given a Namespace
         Then its id is mandatory
 
+    Scenario: A Namespace id cannot be changed
+        Given a Namespace
+        Then its id cannot be changed
+
     Scenario: A Namespace has a name
         Given a Namespace
         Then it must have a field named name
@@ -59,3 +63,13 @@ Feature: Describing a Namespace
     Scenario: A Namespace kind is mandatory
         Given a Namespace
         Then its kind is mandatory
+
+    Scenario: A Namespace cannot be contained in itself
+        Given a Namespace
+        Then its namespace cannot be itself
+
+    Scenario: A Namespace namespace cannot be in a loop
+        Given a Namespace
+        And a second Namespace
+        And a third Namespace
+        Then we cannot create a relationships loop with these namespaces
