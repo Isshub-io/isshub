@@ -9,13 +9,38 @@ It is an adapter over the ``attrs`` external dependency.
 import attr
 
 
+class _InstanceOfSelfValidator(
+    attr.validators._InstanceOfValidator  # pylint: disable=protected-access
+):
+    """Validator checking that the field holds an instance of its own model."""
+
+    def __call__(self, inst, attr, value):  # pylint: disable=redefined-outer-name
+        """Validate that the `value` is an instance of the class of `inst`.
+
+        For the parameters, see ``attr.validators._InstanceOfValidator``
+        """
+        self.type = inst.__class__
+        super().__call__(inst, attr, value)
+
+
+def instance_of_self() -> _InstanceOfSelfValidator:
+    """Return a validator checking that the field holds an instance of its own model.
+
+    Returns
+    -------
+    _InstanceOfSelfValidator
+        The instantiated validator
+    """
+    return _InstanceOfSelfValidator(type=None)
+
+
 def optional_field(field_type):
     """Define an optional field of the specified `field_type`.
 
     Parameters
     ----------
-    field_type : type
-        The expected type of the field when not ``None``.
+    field_type : Union[type, str]
+        The expected type of the field. Use the string "self" to reference the current field's model
 
     Returns
     -------
@@ -37,7 +62,11 @@ def optional_field(field_type):
     """
     return attr.ib(
         default=None,
-        validator=attr.validators.optional(attr.validators.instance_of(field_type)),
+        validator=attr.validators.optional(
+            instance_of_self()
+            if field_type == "self"
+            else attr.validators.instance_of(field_type)
+        ),
     )
 
 
@@ -46,8 +75,8 @@ def required_field(field_type, frozen=False):
 
     Parameters
     ----------
-    field_type : type
-        The expected type of the field.
+    field_type : Union[type, str]
+        The expected type of the field. Use the string "self" to reference the current field's model
     frozen : bool
         If set to ``False`` (the default), the field can be updated after being set at init time.
         If set to ``True``, the field can be set at init time but cannot be changed later, else a
@@ -70,7 +99,11 @@ def required_field(field_type, frozen=False):
     >>> check_field_not_nullable(MyModel, 'my_field', my_field='foo')
 
     """
-    kwargs = {"validator": attr.validators.instance_of(field_type)}
+    kwargs = {
+        "validator": instance_of_self()
+        if field_type == "self"
+        else attr.validators.instance_of(field_type)
+    }
     if frozen:
         kwargs["on_setattr"] = attr.setters.frozen
 
@@ -80,7 +113,9 @@ def required_field(field_type, frozen=False):
 def validated():
     """Decorate an entity to handle validation.
 
-    This will let ``attrs`` manage the class, using slots for fields.
+    This will let ``attrs`` manage the class, using slots for fields, and forcing attributes to
+    be passed as named arguments (this allows to not have to defined all required fields first, then
+    optional ones, and resolves problems with inheritance where we can't handle the order)
 
     Returns
     -------
@@ -101,7 +136,7 @@ def validated():
     >>> instance = MyModel()
     Traceback (most recent call last):
         ...
-    TypeError: __init__() missing 1 required positional argument: 'my_field'
+    TypeError: __init__() missing 1 required keyword-only argument: 'my_field'
     >>> instance = MyModel(my_field='foo')
     >>> instance.my_field
     'foo'
@@ -113,7 +148,7 @@ def validated():
     TypeError: ("'my_field' must be <class 'str'> (got None that is a <class 'NoneType'>)...
 
     """
-    return attr.s(slots=True)
+    return attr.s(slots=True, kw_only=True)
 
 
 def field_validator(field):

@@ -21,13 +21,8 @@ class NamespaceKind(enum.Enum):
 
 
 @validated()  # type: ignore
-class _Namespace(BaseModelWithId):
+class Namespace(BaseModelWithId):
     """A namespace can contain namespaces and repositories.
-
-    Notes
-    -----
-    This is a base class, used by `Namespace` to be able to have a self-reference for the type
-    of the `namespace` field.
 
     Attributes
     ----------
@@ -45,31 +40,9 @@ class _Namespace(BaseModelWithId):
     """
 
     name: str = required_field(str)  # type: ignore
-    namespace = None
+    namespace: Optional["Namespace"] = optional_field("self")  # type: ignore
     kind: NamespaceKind = required_field(NamespaceKind)  # type: ignore
     description: str = optional_field(str)  # type: ignore
-
-
-@validated()  # type: ignore
-class Namespace(_Namespace):
-    """A namespace can contain namespaces and repositories.
-
-    Attributes
-    ----------
-    id : int
-        The unique identifier of the namespace
-    name : str
-        The name of the namespace. Unique in its parent namespace.
-    namespace : Optional[Namespace]
-        Where the namespace can be found.
-    kind : NamespaceKind
-        The kind of namespace.
-    description : Optional[str]
-        The description of the namespace.
-
-    """
-
-    namespace: Optional[_Namespace] = optional_field(_Namespace)  # type: ignore
 
     @field_validator(namespace)  # type: ignore
     def validate_namespace_is_not_in_a_loop(  # noqa  # pylint: disable=unused-argument
