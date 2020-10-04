@@ -4,7 +4,7 @@ from isshub.domain.contexts.code_repository.entities.namespace import Namespace
 from isshub.domain.utils.entity import BaseModelWithId, required_field, validated
 
 
-@validated()  # type: ignore
+@validated()
 class Repository(BaseModelWithId):
     """A repository holds code, issues, code requests...
 
@@ -19,7 +19,5 @@ class Repository(BaseModelWithId):
 
     """
 
-    name: str = required_field(str)  # type: ignore
-    namespace: Namespace = required_field(  # type: ignore
-        Namespace, relation_verbose_name="belongs to"
-    )
+    name: str = required_field(str)
+    namespace: Namespace = required_field(Namespace, relation_verbose_name="belongs to")

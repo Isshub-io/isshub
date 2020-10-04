@@ -3,18 +3,37 @@
 It is an adapter over the ``attrs`` external dependency.
 
 """
-
-# type: ignore
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generic,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import attr
 
 
+_T = TypeVar("_T")
+
+if TYPE_CHECKING:
+    from attr.__init__ import Attribute  # isort:skip
+else:
+
+    class Attribute(Generic[_T]):
+        """Class for typing when not using mypy, for example when using ``get_type_hints``."""
+
+
 class _InstanceOfSelfValidator(
-    attr.validators._InstanceOfValidator  # pylint: disable=protected-access
+    attr.validators._InstanceOfValidator  # type: ignore  # pylint: disable=protected-access
 ):
     """Validator checking that the field holds an instance of its own model."""
 
-    def __call__(self, inst, attr, value):  # pylint: disable=redefined-outer-name
+    def __call__(self, inst, attr, value):  # type: ignore  # pylint: disable=redefined-outer-name
         """Validate that the `value` is an instance of the class of `inst`.
 
         For the parameters, see ``attr.validators._InstanceOfValidator``
@@ -34,7 +53,9 @@ def instance_of_self() -> _InstanceOfSelfValidator:
     return _InstanceOfSelfValidator(type=None)
 
 
-def optional_field(field_type, relation_verbose_name=None):
+def optional_field(
+    field_type: Union[Type[_T], str], relation_verbose_name: Optional[str] = None
+) -> Optional[_T]:
     """Define an optional field of the specified `field_type`.
 
     Parameters
@@ -50,6 +71,11 @@ def optional_field(field_type, relation_verbose_name=None):
     Any
         An ``attrs`` attribute, with a default value set to ``None``, and a validator checking
         that this field is optional and, if set, of the correct type.
+
+    Raises
+    ------
+    AssertionError
+        If `field_type` is a string and this string is not "self"
 
     Examples
     --------
@@ -67,18 +93,24 @@ def optional_field(field_type, relation_verbose_name=None):
     if relation_verbose_name:
         metadata["relation_verbose_name"] = relation_verbose_name
 
+    assert not isinstance(field_type, str) or field_type == "self"
+
     return attr.ib(
         default=None,
         validator=attr.validators.optional(
             instance_of_self()
-            if field_type == "self"
+            if isinstance(field_type, str)
             else attr.validators.instance_of(field_type)
         ),
         metadata=metadata,
     )
 
 
-def required_field(field_type, frozen=False, relation_verbose_name=None):
+def required_field(
+    field_type: Union[Type[_T], str],
+    frozen: bool = False,
+    relation_verbose_name: Optional[str] = None,
+) -> _T:
     """Define a required field of the specified `field_type`.
 
     Parameters
@@ -98,6 +130,11 @@ def required_field(field_type, frozen=False, relation_verbose_name=None):
     Any
         An ``attrs`` attribute, and a validator checking that this field is of the correct type.
 
+    Raises
+    ------
+    AssertionError
+        If `field_type` is a string and this string is not "self"
+
     Examples
     --------
     >>> from isshub.domain.utils.entity import required_field, validated, BaseModel
@@ -114,19 +151,21 @@ def required_field(field_type, frozen=False, relation_verbose_name=None):
     if relation_verbose_name:
         metadata["relation_verbose_name"] = relation_verbose_name
 
+    assert not isinstance(field_type, str) or field_type == "self"
+
     kwargs = {
         "validator": instance_of_self()
-        if field_type == "self"
+        if isinstance(field_type, str)
         else attr.validators.instance_of(field_type),
         "metadata": metadata,
     }
     if frozen:
         kwargs["on_setattr"] = attr.setters.frozen
 
-    return attr.ib(**kwargs)
+    return attr.ib(**kwargs)  # type: ignore
 
 
-def validated():
+def validated() -> Any:
     """Decorate an entity to handle validation.
 
     This will let ``attrs`` manage the class, using slots for fields, and forcing attributes to
@@ -167,18 +206,23 @@ def validated():
     return attr.s(slots=True, kw_only=True)
 
 
-def field_validator(field):
+TValidateMethod = TypeVar(
+    "TValidateMethod", bound=Callable[[Any, "Attribute[_T]", _T], None]
+)
+
+
+class field_validator:  # pylint: disable=invalid-name
     """Decorate an entity method to make it a validator of the given `field`.
+
+    Notes
+    -----
+    It's easier to implement as a function but we couldn't make mypy work with it.
+    Thanks to https://github.com/python/mypy/issues/1551#issuecomment-253978622
 
     Parameters
     ----------
     field : Any
         The field to validate.
-
-    Returns
-    -------
-    Callable
-        The decorated method.
 
     Examples
     --------
@@ -211,10 +255,29 @@ def field_validator(field):
     'foo'
 
     """
-    return field.validator
+
+    def __init__(self, field: "Attribute[_T]") -> None:
+        """Save the given field."""
+        self.field = field
+
+    def __call__(self, func: TValidateMethod) -> TValidateMethod:
+        """Decorate the given function.
+
+        Parameters
+        ----------
+        func: Callable
+            The validation method to decorate
+
+        Returns
+        -------
+        Callable
+            The decorated method.
+
+        """
+        return cast(TValidateMethod, self.field.validator(func))
 
 
-def validate_instance(instance):
+def validate_instance(instance: Any) -> Any:
     """Validate a whole instance.
 
     Parameters
@@ -247,7 +310,9 @@ def validate_instance(instance):
     attr.validate(instance)
 
 
-def validate_positive_integer(value, none_allowed, display_name):
+def validate_positive_integer(
+    value: Any, none_allowed: bool, display_name: str
+) -> None:
     """Validate that the given `value` is a positive integer (``None`` accepted if `none_allowed`).
 
     Parameters
@@ -346,8 +411,8 @@ class BaseModelWithId(BaseModel):
 
     @field_validator(id)
     def validate_id_is_positive_integer(  # noqa  # pylint: disable=unused-argument
-        self, field, value
-    ):
+        self, field: "Attribute[_T]", value: _T
+    ) -> None:
         """Validate that the ``id`` field is a positive integer.
 
         Parameters

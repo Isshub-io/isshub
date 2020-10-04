@@ -20,7 +20,7 @@ class NamespaceKind(enum.Enum):
     GROUP = "Group"
 
 
-@validated()  # type: ignore
+@validated()
 class Namespace(BaseModelWithId):
     """A namespace can contain namespaces and repositories.
 
@@ -39,16 +39,14 @@ class Namespace(BaseModelWithId):
 
     """
 
-    name: str = required_field(str)  # type: ignore
-    kind: NamespaceKind = required_field(  # type: ignore
-        NamespaceKind, relation_verbose_name="is a"
-    )
-    namespace: Optional["Namespace"] = optional_field(  # type: ignore
+    name: str = required_field(str)
+    kind: NamespaceKind = required_field(NamespaceKind, relation_verbose_name="is a")
+    namespace: Optional["Namespace"] = optional_field(
         "self", relation_verbose_name="may belongs to"
     )
-    description: Optional[str] = optional_field(str)  # type: ignore
+    description: Optional[str] = optional_field(str)
 
-    @field_validator(namespace)  # type: ignore
+    @field_validator(namespace)
     def validate_namespace_is_not_in_a_loop(  # noqa  # pylint: disable=unused-argument
         self, field: Any, value: Any
     ) -> None:
