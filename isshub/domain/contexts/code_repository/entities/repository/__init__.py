@@ -20,4 +20,6 @@ class Repository(BaseModelWithId):
     """
 
     name: str = required_field(str)  # type: ignore
-    namespace: Namespace = required_field(Namespace)  # type: ignore
+    namespace: Namespace = required_field(  # type: ignore
+        Namespace, relation_verbose_name="belongs to"
+    )

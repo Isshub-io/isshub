@@ -40,9 +40,13 @@ class Namespace(BaseModelWithId):
     """
 
     name: str = required_field(str)  # type: ignore
-    namespace: Optional["Namespace"] = optional_field("self")  # type: ignore
-    kind: NamespaceKind = required_field(NamespaceKind)  # type: ignore
-    description: str = optional_field(str)  # type: ignore
+    kind: NamespaceKind = required_field(  # type: ignore
+        NamespaceKind, relation_verbose_name="is a"
+    )
+    namespace: Optional["Namespace"] = optional_field(  # type: ignore
+        "self", relation_verbose_name="may belongs to"
+    )
+    description: Optional[str] = optional_field(str)  # type: ignore
 
     @field_validator(namespace)  # type: ignore
     def validate_namespace_is_not_in_a_loop(  # noqa  # pylint: disable=unused-argument

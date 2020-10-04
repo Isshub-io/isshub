@@ -12,11 +12,10 @@
 #
 
 
-import glob
-import importlib
 import os
 import subprocess
 import sys
+from glob import glob
 
 from sphinx.ext import apidoc
 
@@ -45,6 +44,7 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
+    "sphinx.ext.graphviz",
     "sphinx_autodoc_typehints",
     "sphinxprettysearchresults",
 ]
@@ -143,6 +143,24 @@ def run_gherkindoc(_):
             "5",
         ]
     )
+
+    # add the diagrams
+    subprocess.run(
+        [
+            os.path.join(current_dir, "domain_contexts_diagrams.py"),
+            output_path,
+        ]
+    )
+
+    # incorporate the diagrams in each contexts doc
+    for file in glob(os.path.join(output_path, "*-entities.dot")):
+        base_name = os.path.basename(file)[:-13]
+        rst_file = os.path.join(output_path, f"{base_name}-toc.rst")
+        with open(rst_file, "r") as file_d:
+            rst_lines = file_d.readlines()
+        rst_lines.insert(3, f".. graphviz:: {base_name}-entities.dot\n\n")
+        with open(rst_file, "w") as file_d:
+            file_d.write("".join(rst_lines))
 
 
 def run_git_to_sphinx(_):

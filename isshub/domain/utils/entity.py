@@ -34,13 +34,16 @@ def instance_of_self() -> _InstanceOfSelfValidator:
     return _InstanceOfSelfValidator(type=None)
 
 
-def optional_field(field_type):
+def optional_field(field_type, relation_verbose_name=None):
     """Define an optional field of the specified `field_type`.
 
     Parameters
     ----------
     field_type : Union[type, str]
         The expected type of the field. Use the string "self" to reference the current field's model
+    relation_verbose_name : Optional[str]
+        A verbose name to describe the relation between the model linked to the field, and the
+        model pointed by `field_type`
 
     Returns
     -------
@@ -60,6 +63,10 @@ def optional_field(field_type):
     >>> check_field_nullable(MyModel, 'my_field', my_field='foo')
 
     """
+    metadata = {}
+    if relation_verbose_name:
+        metadata["relation_verbose_name"] = relation_verbose_name
+
     return attr.ib(
         default=None,
         validator=attr.validators.optional(
@@ -67,10 +74,11 @@ def optional_field(field_type):
             if field_type == "self"
             else attr.validators.instance_of(field_type)
         ),
+        metadata=metadata,
     )
 
 
-def required_field(field_type, frozen=False):
+def required_field(field_type, frozen=False, relation_verbose_name=None):
     """Define a required field of the specified `field_type`.
 
     Parameters
@@ -81,6 +89,9 @@ def required_field(field_type, frozen=False):
         If set to ``False`` (the default), the field can be updated after being set at init time.
         If set to ``True``, the field can be set at init time but cannot be changed later, else a
         ``FrozenAttributeError`` exception will be raised.
+    relation_verbose_name : Optional[str]
+        A verbose name to describe the relation between the model linked to the field, and the
+        model pointed by `field_type`
 
     Returns
     -------
@@ -99,10 +110,15 @@ def required_field(field_type, frozen=False):
     >>> check_field_not_nullable(MyModel, 'my_field', my_field='foo')
 
     """
+    metadata = {}
+    if relation_verbose_name:
+        metadata["relation_verbose_name"] = relation_verbose_name
+
     kwargs = {
         "validator": instance_of_self()
         if field_type == "self"
-        else attr.validators.instance_of(field_type)
+        else attr.validators.instance_of(field_type),
+        "metadata": metadata,
     }
     if frozen:
         kwargs["on_setattr"] = attr.setters.frozen

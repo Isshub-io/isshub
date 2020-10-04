@@ -186,6 +186,9 @@ jobs:
     <<: *python_only_config
     steps:
       - *attach_workspace
+      - type: shell
+        name: Install system dependencies
+        command: sudo apt-get update -qq -y && sudo apt-get install -y graphviz
       - run:
           name: Auth with github
           # github changes their keys sometimes and we run into this issue:
