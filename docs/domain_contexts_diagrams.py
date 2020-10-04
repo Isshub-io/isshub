@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Make the diagrams of models for each isshub domain contexts."""
+"""Make the diagrams of entities for each isshub domain contexts."""
 
 import importlib
 import os.path
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from attr import _Fields  # pylint: disable=no-name-in-module
 
 from isshub.domain import contexts
-from isshub.domain.utils.entity import BaseModel
+from isshub.domain.utils.entity import BaseEntity
 
 
 def import_submodules(
@@ -157,13 +157,13 @@ def render_enum(enum: Type[Enum]) -> Tuple[str, str]:
     )
 
 
-def validate_model(
+def validate_entity(
     name: str,
-    model: Type[BaseModel],
+    entity: Type[BaseEntity],
     context: str,
-    linkable_models: Dict[str, Type[BaseModel]],
+    linkable_entities: Dict[str, Type[BaseEntity]],
 ) -> Dict[str, Tuple[Any, bool]]:
-    """Validate that we can handle the given model and its fields.
+    """Validate that we can handle the given entity and its fields.
 
     We only handle fields defined with a "type hint", restricted to:
     - the ones with a direct type
@@ -171,20 +171,20 @@ def validate_model(
       ``NoneType``)
 
     The direct type, if in the ``isshub`` namespace, must be in the given `context` (in the given
-    `linkable_models`.
+    `linkable_entities`.
 
     Parameters
     ----------
     name : str
-        The name of the `model`
-    model : Type[BaseModel]
-        The model to validate
+        The name of the `entity`
+    entity : Type[BaseEntity]
+        The entity to validate
     context : str
-        The name of the context, ie the name of the module containing the `model` and the
-        `linkable_models`
-    linkable_models : Dict[str, Type[BaseModel]]
-        A dict containing all the models the `model` to validate can link to, with their full python
-        path as keys, and the models themselves as values
+        The name of the context, ie the name of the module containing the `entity` and the
+        `linkable_entities`
+    linkable_entities : Dict[str, Type[BaseEntity]]
+        A dict containing all the entities the `entity` to validate can link to, with their full python
+        path as keys, and the entities themselves as values
 
     Returns
     -------
@@ -198,10 +198,10 @@ def validate_model(
         If the type is a ``Union`` of more than two types or with one not being ``NoneType``
     TypeError
         If the type is an object in the ``isshub`` namespace that is not in the given
-        `linkable_models` (except for enums, actually)
+        `linkable_entities` (except for enums, actually)
 
     """
-    types = get_type_hints(model)
+    types = get_type_hints(entity)
     fields = {}
     for field_name, field_type in types.items():
         required = True
@@ -223,10 +223,10 @@ def validate_model(
         if field_type.__module__.startswith("isshub") and not issubclass(
             field_type, Enum
         ):
-            if get_python_path(field_type) not in linkable_models:
+            if get_python_path(field_type) not in linkable_entities:
                 raise TypeError(
                     f"{name}.{field_name} : {field_type}"
-                    f" - It's not a valid model in context {context}"
+                    f" - It's not a valid entity in context {context}"
                 )
 
         fields[field_name] = (field_type, required)
@@ -241,12 +241,12 @@ def render_link(
     required: bool,
     attr_fields: "_Fields",
 ) -> str:
-    """Render a link between the field of a model to another class.
+    """Render a link between the field of an entity to another class.
 
     Parameters
     ----------
     source_name : str
-        The dot identifier of the source class. The source class is expected to be a entity model
+        The dot identifier of the source class. The source class is expected to be an entity class
     field_name : str
         The field in the source class that is linked to the dest class
     dest_name : str
@@ -275,49 +275,49 @@ def render_link(
     return f'{source_name}:{field_name} -> {dest_name}:__class__ [label="{link_label}"]'
 
 
-def render_model(
+def render_entity(
     name: str,
-    model: Type[BaseModel],
+    entity: Type[BaseEntity],
     context: str,
-    linkable_models: Dict[str, Type[BaseModel]],
+    linkable_entities: Dict[str, Type[BaseEntity]],
 ) -> Tuple[Dict[str, str], Set[str]]:
-    """Render the given `model` to be incorporated in a dot file, with links.
+    """Render the given `entity` to be incorporated in a dot file, with links.
 
     Parameters
     ----------
     name : str
-        The name of the `model`
-    model : Type[BaseModel]
-        The model to render
+        The name of the `entity`
+    entity : Type[BaseEntity]
+        The entity to render
     context : str
-        The name of the context, ie the name of the module containing the `model` and the
-        `linkable_models`
-    linkable_models : Dict[str, Type[BaseModel]]
-        A dict containing all the models the `model` to validate can link to, with their full python
-        path as keys, and the models themselves as values
+        The name of the context, ie the name of the module containing the `entity` and the
+        `linkable_entities`
+    linkable_entities : Dict[str, Type[BaseEntity]]
+        A dict containing all the entities the `entity` to validate can link to, with their full python
+        path as keys, and the entities themselves as values
 
     Returns
     -------
     Dict[str, str]
-        Lines representing the models (or enums) to render in the graph.
-        The keys are the dot identifier of the model (or enum), and the values are the line to put
+        Lines representing the entities (or enums) to render in the graph.
+        The keys are the dot identifier of the entity (or enum), and the values are the line to put
         in the dot file to render them.
-        There is at least one entry, the rendered `model`, but there can be more entries, if the
-        `model` is linked to some enums (we use a dict to let the caller to deduplicate enums with
-        the same identifiers if called from many models)
+        There is at least one entry, the rendered `entity`, but there can be more entries, if the
+        `entity` is linked to some enums (we use a dict to let the caller to deduplicate enums with
+        the same identifiers if called from many entities)
     Set[str]
-        Lines representing the links between the `model` and other models or enums.
+        Lines representing the links between the `entity` and other entities or enums.
 
     """
     lines = {}
     links = set()
 
     dot_name = get_dot_identifier(name)
-    attr_fields = attr.fields(model)
+    attr_fields = attr.fields(entity)
     fields = {}
 
-    for field_name, (field_type, required) in validate_model(
-        name, model, context, linkable_models
+    for field_name, (field_type, required) in validate_entity(
+        name, entity, context, linkable_entities
     ).items():
 
         link_to = None
@@ -341,50 +341,50 @@ def render_model(
     )
     lines[
         dot_name
-    ] = f'{dot_name} [label="<__class__> Model: {model.__name__}|{fields_parts}"]'
+    ] = f'{dot_name} [label="<__class__> Entity: {entity.__name__}|{fields_parts}"]'
 
     return lines, links
 
 
 def make_domain_context_graph(
-    context_name: str, subclasses: Dict[str, Type[BaseModel]], output_path: str
+    context_name: str, subclasses: Dict[str, Type[BaseEntity]], output_path: str
 ) -> None:
-    """Make the graph of models in the given contexts.
+    """Make the graph of entities in the given contexts.
 
     Parameters
     ----------
     context_name : str
         The name of the context, represented by the python path of its module
-    subclasses : Dict[str, Type[BaseModel]]
-        All the subclasses of ``BaseModel`` from which to extract the modules to render.
+    subclasses : Dict[str, Type[BaseEntity]]
+        All the subclasses of ``BaseEntity`` from which to extract the modules to render.
         Only subclasses present in the given context will be rendered.
     output_path : str
         The path where to save the generated graph
 
     """
-    # restrict the subclasses of ``BaseModel`` to the ones in the given module name
+    # restrict the subclasses of ``BaseEntity`` to the ones in the given module name
     context_subclasses = {
         subclass_name: subclass
         for subclass_name, subclass in subclasses.items()
         if subclass_name.startswith(context_name + ".")
     }
 
-    # render models and all links between them
-    model_lines, links = {}, set()
+    # render entities and all links between them
+    entity_lines, links = {}, set()
     for subclass_name, subclass in context_subclasses.items():
-        subclass_lines, subclass_links = render_model(
+        subclass_lines, subclass_links = render_entity(
             subclass_name,
             subclass,
             context_name,
             context_subclasses,
         )
-        model_lines.update(subclass_lines)
+        entity_lines.update(subclass_lines)
         links.update(subclass_links)
 
     # compose the content of the dot file
     dot_file_content = (
         """\
-digraph domain_context_models {
+digraph domain_context_entities {
   label = "Domain context [%s]"
   #labelloc = "t"
   rankdir=LR
@@ -392,7 +392,7 @@ digraph domain_context_models {
 """
         % context_name
     )
-    for line in tuple(model_lines.values()) + tuple(links):
+    for line in tuple(entity_lines.values()) + tuple(links):
         dot_file_content += f"  {line}\n"
     dot_file_content += "}"
 
@@ -403,7 +403,7 @@ digraph domain_context_models {
 
 
 def make_domain_contexts_diagrams(output_path: str) -> None:
-    """Make the diagrams of models for each domain contexts.
+    """Make the diagrams of entities for each domain contexts.
 
     Parameters
     ----------
@@ -411,9 +411,9 @@ def make_domain_contexts_diagrams(output_path: str) -> None:
         The path where to save the generated diagrams
 
     """
-    # we need to import all python files (except tests) to find all submodels of ``BaseModel``
+    # we need to import all python files (except tests) to find all subclasses of ``BaseEntity``
     import_submodules(contexts, skip_names=["tests"])
-    subclasses = get_final_subclasses(BaseModel)
+    subclasses = get_final_subclasses(BaseEntity)
 
     # we render each context independently, assuming that each one is directly at the root of
     # the ``contexts`` package

@@ -31,7 +31,7 @@ else:
 class _InstanceOfSelfValidator(
     attr.validators._InstanceOfValidator  # type: ignore  # pylint: disable=protected-access
 ):
-    """Validator checking that the field holds an instance of its own model."""
+    """Validator checking that the field holds an instance of its own entity."""
 
     def __call__(self, inst, attr, value):  # type: ignore  # pylint: disable=redefined-outer-name
         """Validate that the `value` is an instance of the class of `inst`.
@@ -43,7 +43,7 @@ class _InstanceOfSelfValidator(
 
 
 def instance_of_self() -> _InstanceOfSelfValidator:
-    """Return a validator checking that the field holds an instance of its own model.
+    """Return a validator checking that the field holds an instance of its own entity.
 
     Returns
     -------
@@ -61,10 +61,11 @@ def optional_field(
     Parameters
     ----------
     field_type : Union[type, str]
-        The expected type of the field. Use the string "self" to reference the current field's model
+        The expected type of the field. Use the string "self" to reference the current field's
+        entity
     relation_verbose_name : Optional[str]
-        A verbose name to describe the relation between the model linked to the field, and the
-        model pointed by `field_type`
+        A verbose name to describe the relation between the entity linked to the field, and the
+        entity pointed by `field_type`
 
     Returns
     -------
@@ -79,14 +80,14 @@ def optional_field(
 
     Examples
     --------
-    >>> from isshub.domain.utils.entity import optional_field, validated, BaseModel
+    >>> from isshub.domain.utils.entity import optional_field, validated, BaseEntity
     >>>
     >>> @validated()
-    ... class MyModel(BaseModel):
+    ... class MyEntity(BaseEntity):
     ...     my_field: str = optional_field(str)
     >>>
     >>> from isshub.domain.utils.testing.validation import check_field_nullable
-    >>> check_field_nullable(MyModel, 'my_field', my_field='foo')
+    >>> check_field_nullable(MyEntity, 'my_field', my_field='foo')
 
     """
     metadata = {}
@@ -116,14 +117,15 @@ def required_field(
     Parameters
     ----------
     field_type : Union[type, str]
-        The expected type of the field. Use the string "self" to reference the current field's model
+        The expected type of the field. Use the string "self" to reference the current field's
+        entity
     frozen : bool
         If set to ``False`` (the default), the field can be updated after being set at init time.
         If set to ``True``, the field can be set at init time but cannot be changed later, else a
         ``FrozenAttributeError`` exception will be raised.
     relation_verbose_name : Optional[str]
-        A verbose name to describe the relation between the model linked to the field, and the
-        model pointed by `field_type`
+        A verbose name to describe the relation between the entity linked to the field, and the
+        entity pointed by `field_type`
 
     Returns
     -------
@@ -137,14 +139,14 @@ def required_field(
 
     Examples
     --------
-    >>> from isshub.domain.utils.entity import required_field, validated, BaseModel
+    >>> from isshub.domain.utils.entity import required_field, validated, BaseEntity
     >>>
     >>> @validated()
-    ... class MyModel(BaseModel):
+    ... class MyEntity(BaseEntity):
     ...     my_field: str = required_field(str)
     >>>
     >>> from isshub.domain.utils.testing.validation import check_field_not_nullable
-    >>> check_field_not_nullable(MyModel, 'my_field', my_field='foo')
+    >>> check_field_not_nullable(MyEntity, 'my_field', my_field='foo')
 
     """
     metadata = {}
@@ -179,20 +181,20 @@ def validated() -> Any:
 
     Examples
     --------
-    >>> from isshub.domain.utils.entity import required_field, validated, BaseModel
+    >>> from isshub.domain.utils.entity import required_field, validated, BaseEntity
     >>>
     >>> @validated()
-    ... class MyModel(BaseModel):
+    ... class MyEntity(BaseEntity):
     ...     my_field: str = required_field(str)
     >>>
-    >>> MyModel.__slots__
+    >>> MyEntity.__slots__
     ('my_field',)
     >>>
-    >>> instance = MyModel()
+    >>> instance = MyEntity()
     Traceback (most recent call last):
         ...
     TypeError: __init__() missing 1 required keyword-only argument: 'my_field'
-    >>> instance = MyModel(my_field='foo')
+    >>> instance = MyEntity(my_field='foo')
     >>> instance.my_field
     'foo'
     >>> instance.validate()
@@ -226,10 +228,10 @@ class field_validator:  # pylint: disable=invalid-name
 
     Examples
     --------
-    >>> from isshub.domain.utils.entity import field_validator, required_field, BaseModel
+    >>> from isshub.domain.utils.entity import field_validator, required_field, BaseEntity
     >>>
     >>> @validated()
-    ... class MyModel(BaseModel):
+    ... class MyEntity(BaseEntity):
     ...    my_field: str = required_field(str)
     ...
     ...    @field_validator(my_field)
@@ -237,18 +239,18 @@ class field_validator:  # pylint: disable=invalid-name
     ...        if value != 'foo':
     ...            raise ValueError(f'{self.__class__.__name__}.my_field must be "foo"')
     >>>
-    >>> instance = MyModel(my_field='bar')
+    >>> instance = MyEntity(my_field='bar')
     Traceback (most recent call last):
         ...
-    ValueError: MyModel.my_field must be "foo"
-    >>> instance = MyModel(my_field='foo')
+    ValueError: MyEntity.my_field must be "foo"
+    >>> instance = MyEntity(my_field='foo')
     >>> instance.my_field
     'foo'
     >>> instance.my_field = 'bar'
     >>> instance.validate()
     Traceback (most recent call last):
         ...
-    ValueError: MyModel.my_field must be "foo"
+    ValueError: MyEntity.my_field must be "foo"
     >>> instance.my_field = 'foo'
     >>> instance.validate()
     >>> instance.my_field
@@ -292,13 +294,13 @@ def validate_instance(instance: Any) -> Any:
 
     Examples
     --------
-    >>> from isshub.domain.utils.entity import required_field, validate_instance, BaseModel
+    >>> from isshub.domain.utils.entity import required_field, validate_instance, BaseEntity
     >>>
     >>> @validated()
-    ... class MyModel(BaseModel):
+    ... class MyEntity(BaseEntity):
     ...    my_field: str = required_field(str)
     >>>
-    >>> instance = MyModel(my_field='foo')
+    >>> instance = MyEntity(my_field='foo')
     >>> validate_instance(instance)
     >>> instance.my_field = None
     >>> validate_instance(instance)
@@ -333,10 +335,10 @@ def validate_positive_integer(
 
     Examples
     --------
-    >>> from isshub.domain.utils.entity import field_validator, required_field, BaseModel
+    >>> from isshub.domain.utils.entity import field_validator, required_field, BaseEntity
     >>>
     >>> @validated()
-    ... class MyModel(BaseModel):
+    ... class MyEntity(BaseEntity):
     ...    my_field: int = required_field(int)
     ...
     ...    @field_validator(my_field)
@@ -347,28 +349,28 @@ def validate_positive_integer(
     ...            display_name=f"{self.__class__.__name__}.my_field",
     ...        )
     >>>
-    >>> instance = MyModel(my_field='foo')
+    >>> instance = MyEntity(my_field='foo')
     Traceback (most recent call last):
         ...
     TypeError: ("'my_field' must be <class 'int'> (got 'foo' that is a <class 'str'>)...
-    >>> instance = MyModel(my_field=-2)
+    >>> instance = MyEntity(my_field=-2)
     Traceback (most recent call last):
         ...
-    ValueError: MyModel.my_field must be a positive integer
-    >>> instance = MyModel(my_field=0)
+    ValueError: MyEntity.my_field must be a positive integer
+    >>> instance = MyEntity(my_field=0)
     Traceback (most recent call last):
         ...
-    ValueError: MyModel.my_field must be a positive integer
-    >>> instance = MyModel(my_field=1.1)
+    ValueError: MyEntity.my_field must be a positive integer
+    >>> instance = MyEntity(my_field=1.1)
     Traceback (most recent call last):
         ...
     TypeError: ("'my_field' must be <class 'int'> (got 1.1 that is a <class 'float'>)...
-    >>> instance = MyModel(my_field=1)
+    >>> instance = MyEntity(my_field=1)
     >>> instance.my_field = -2
     >>> instance.validate()
     Traceback (most recent call last):
         ...
-    ValueError: MyModel.my_field must be a positive integer
+    ValueError: MyEntity.my_field must be a positive integer
 
     """
     if none_allowed and value is None:
@@ -381,8 +383,8 @@ def validate_positive_integer(
 
 
 @validated()
-class BaseModel:
-    """A base model without any field, that is able to validate itself."""
+class BaseEntity:
+    """A base entity without any field, that is able to validate itself."""
 
     def validate(self) -> None:
         """Validate all fields of the current instance.
@@ -397,8 +399,8 @@ class BaseModel:
 
 
 @validated()
-class BaseModelWithId(BaseModel):
-    """A base model with an ``id``, that is able to validate itself.
+class BaseEntityWithId(BaseEntity):
+    """A base entity with an ``id``, that is able to validate itself.
 
     Attributes
     ----------
