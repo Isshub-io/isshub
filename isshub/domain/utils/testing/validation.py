@@ -1,6 +1,7 @@
 """Validation helpers for BDD tests for isshub entities."""
 
 from typing import Any, Callable, List, Optional, Tuple, Type
+from uuid import UUID
 
 import pytest
 
@@ -28,6 +29,12 @@ no_zero: ValuesValidation = [(0, ValueError)]
 positive_integer_only: ValuesValidation = integer_only + no_zero
 
 string_only: ValuesValidation = [("foo", None), (1, TypeError), (-0.1, TypeError)]
+
+uuid4_only: ValuesValidation = [
+    (UUID("19f49bc8-06e5-11eb-8465-bf44725d7bd3"), TypeError),
+    ("7298d61a-f08f-4f83-b75e-934e786eb43d", TypeError),
+    (UUID("7298d61a-f08f-4f83-b75e-934e786eb43d"), None),
+]
 
 
 def check_field(obj: BaseEntity, field_name: str) -> None:

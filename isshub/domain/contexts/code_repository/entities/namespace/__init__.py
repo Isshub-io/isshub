@@ -4,7 +4,7 @@ import enum
 from typing import Any, Optional
 
 from isshub.domain.utils.entity import (
-    BaseEntityWithId,
+    BaseEntityWithIdentifier,
     field_validator,
     optional_field,
     required_field,
@@ -21,12 +21,12 @@ class NamespaceKind(enum.Enum):
 
 
 @validated()
-class Namespace(BaseEntityWithId):
+class Namespace(BaseEntityWithIdentifier):
     """A namespace can contain namespaces and repositories.
 
     Attributes
     ----------
-    id : int
+    identifier : UUID
         The unique identifier of the namespace
     name : str
         The name of the namespace. Unique in its parent namespace.

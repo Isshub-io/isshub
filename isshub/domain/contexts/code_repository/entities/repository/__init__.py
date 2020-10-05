@@ -1,16 +1,20 @@
 """Package defining the ``Repository`` entity."""
 
 from isshub.domain.contexts.code_repository.entities.namespace import Namespace
-from isshub.domain.utils.entity import BaseEntityWithId, required_field, validated
+from isshub.domain.utils.entity import (
+    BaseEntityWithIdentifier,
+    required_field,
+    validated,
+)
 
 
 @validated()
-class Repository(BaseEntityWithId):
+class Repository(BaseEntityWithIdentifier):
     """A repository holds code, issues, code requests...
 
     Attributes
     ----------
-    id : int
+    identifier : UUID
         The unique identifier of the repository
     name : str
         The name of the repository. Unique in its namespace.

@@ -1,4 +1,5 @@
 """Module holding BDD tests for isshub Namespace code_repository entity."""
+from uuid import uuid4
 
 import pytest
 from pytest import mark
@@ -11,16 +12,16 @@ from isshub.domain.utils.testing.validation import (
     check_field_not_nullable,
     check_field_nullable,
     check_field_value,
-    positive_integer_only,
     string_only,
+    uuid4_only,
 )
 
 from .fixtures import namespace, namespace_factory
 
 
-@mark.parametrize(["value", "exception"], positive_integer_only)
-@scenario("../features/describe.feature", "A Namespace id is a positive integer")
-def test_namespace_id_is_a_positive_integer(value, exception):
+@mark.parametrize(["value", "exception"], uuid4_only)
+@scenario("../features/describe.feature", "A Namespace identifier is a uuid")
+def test_namespace_identifier_is_a_uuid(value, exception):
     pass
 
 
@@ -89,15 +90,15 @@ def namespace_field_is_optional(namespace_factory, field_name):
     check_field_nullable(namespace_factory, field_name)
 
 
-@scenario("../features/describe.feature", "A Namespace id cannot be changed")
-def test_namespace_id_cannot_be_changed():
+@scenario("../features/describe.feature", "A Namespace identifier cannot be changed")
+def test_namespace_identifier_cannot_be_changed():
     pass
 
 
-@then("its id cannot be changed")
-def namespace_id_cannot_be_changed(namespace):
+@then("its identifier cannot be changed")
+def namespace_identifier_cannot_be_changed(namespace):
     with pytest.raises(FrozenAttributeError):
-        namespace.id = namespace.id + 1
+        namespace.identifier = uuid4()
 
 
 @scenario("../features/describe.feature", "A Namespace cannot be contained in itself")

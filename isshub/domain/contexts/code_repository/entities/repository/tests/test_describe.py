@@ -1,4 +1,5 @@
 """Module holding BDD tests for isshub Repository code_repository entity."""
+from uuid import uuid4
 
 import pytest
 from pytest import mark
@@ -9,17 +10,17 @@ from isshub.domain.utils.testing.validation import (
     check_field,
     check_field_not_nullable,
     check_field_value,
-    positive_integer_only,
     string_only,
+    uuid4_only,
 )
 
 from ...namespace.tests.fixtures import namespace
 from .fixtures import repository_factory
 
 
-@mark.parametrize(["value", "exception"], positive_integer_only)
-@scenario("../features/describe.feature", "A Repository id is a positive integer")
-def test_repository_id_is_a_positive_integer(value, exception):
+@mark.parametrize(["value", "exception"], uuid4_only)
+@scenario("../features/describe.feature", "A Repository identifier is a uuid")
+def test_repository_identifier_is_a_uuid(value, exception):
     pass
 
 
@@ -68,12 +69,12 @@ def repository_field_is_mandatory(repository_factory, field_name):
     check_field_not_nullable(repository_factory, field_name)
 
 
-@scenario("../features/describe.feature", "A Repository id cannot be changed")
-def test_repository_id_cannot_be_changed():
+@scenario("../features/describe.feature", "A Repository identifier cannot be changed")
+def test_repository_identifier_cannot_be_changed():
     pass
 
 
-@then("its id cannot be changed")
-def repository_id_cannot_be_changed(repository):
+@then("its identifier cannot be changed")
+def repository_identifier_cannot_be_changed(repository):
     with pytest.raises(FrozenAttributeError):
-        repository.id = repository.id + 1
+        repository.identifier = uuid4()

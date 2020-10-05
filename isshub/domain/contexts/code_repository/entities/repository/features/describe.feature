@@ -1,20 +1,20 @@
 Feature: Describing a Repository
 
-    Scenario: A Repository has an id
+    Scenario: A Repository has an identifier
         Given a Repository
-        Then it must have a field named id
+        Then it must have a field named identifier
 
-    Scenario: A Repository id is a positive integer
+    Scenario: A Repository identifier is a uuid
         Given a Repository
-        Then its id must be a positive integer
+        Then its identifier must be a uuid
 
-    Scenario: A Repository id is mandatory
+    Scenario: A Repository identifier is mandatory
         Given a Repository
-        Then its id is mandatory
+        Then its identifier is mandatory
 
-    Scenario: A Repository id cannot be changed
+    Scenario: A Repository identifier cannot be changed
         Given a Repository
-        Then its id cannot be changed
+        Then its identifier cannot be changed
 
     Scenario: A Repository has a name
         Given a Repository

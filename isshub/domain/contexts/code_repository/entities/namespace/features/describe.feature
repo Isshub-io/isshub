@@ -1,20 +1,20 @@
 Feature: Describing a Namespace
 
-    Scenario: A Namespace has an id
+    Scenario: A Namespace has an identifier
         Given a Namespace
-        Then it must have a field named id
+        Then it must have a field named identifier
 
-    Scenario: A Namespace id is a positive integer
+    Scenario: A Namespace identifier is a uuid
         Given a Namespace
-        Then its id must be a positive integer
+        Then its identifier must be a uuid
 
-    Scenario: A Namespace id is mandatory
+    Scenario: A Namespace identifier is mandatory
         Given a Namespace
-        Then its id is mandatory
+        Then its identifier is mandatory
 
-    Scenario: A Namespace id cannot be changed
+    Scenario: A Namespace identifier cannot be changed
         Given a Namespace
-        Then its id cannot be changed
+        Then its identifier cannot be changed
 
     Scenario: A Namespace has a name
         Given a Namespace

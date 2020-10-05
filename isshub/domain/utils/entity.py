@@ -14,6 +14,7 @@ from typing import (
     Union,
     cast,
 )
+from uuid import UUID
 
 import attr
 
@@ -382,6 +383,67 @@ def validate_positive_integer(
         raise ValueError(f"{display_name} must be a positive integer")
 
 
+def validate_uuid(value: Any, none_allowed: bool, display_name: str) -> None:
+    """Validate that the given `value` is a uuid (version 4) (``None`` accepted if `none_allowed`).
+
+    Parameters
+    ----------
+    value : Any
+        The value to validate as a uuid.
+    none_allowed : bool
+        If ``True``, the value can be ``None``. If ``False``, the value must be a uuid.
+    display_name : str
+        The name of the field to display in errors.
+
+    Raises
+    ------
+    TypeError
+        If `value` is not of type ``UUID`` version 4 .
+
+    Examples
+    --------
+    >>> from uuid import UUID
+    >>> from isshub.domain.utils.entity import field_validator, required_field, BaseEntity
+    >>>
+    >>> @validated()
+    ... class MyEntity(BaseEntity):
+    ...    my_field: UUID = required_field(UUID)
+    ...
+    ...    @field_validator(my_field)
+    ...    def validate_my_field(self, field, value):
+    ...        validate_uuid(
+    ...            value=value,
+    ...            none_allowed=False,
+    ...            display_name=f"{self.__class__.__name__}.my_field",
+    ...        )
+    >>>
+    >>> instance = MyEntity(my_field='foo')
+    Traceback (most recent call last):
+        ...
+    TypeError: ("'my_field' must be <class 'uuid.UUID'> (got 'foo' that is a <class 'str'>)...
+    >>> instance = MyEntity(my_field='7298d61a-f08f-4f83-b75e-934e786eb43d')
+    Traceback (most recent call last):
+        ...
+    TypeError: ("'my_field' must be <class 'uuid.UUID'> (got '7298d61a-f08f-4f83-b75e-934e786eb43d' that is a <class 'str'>)...
+    >>> instance = MyEntity(my_field=UUID('19f49bc8-06e5-11eb-8465-bf44725d7bd3'))
+    Traceback (most recent call last):
+        ...
+    TypeError: MyEntity.my_field must be a UUID version 4
+    >>> instance = MyEntity(my_field=UUID('7298d61a-f08f-4f83-b75e-934e786eb43d'))
+    >>> instance.my_field = UUID('19f49bc8-06e5-11eb-8465-bf44725d7bd3')
+    >>> instance.validate()
+    Traceback (most recent call last):
+        ...
+    TypeError: MyEntity.my_field must be a UUID version 4
+
+    """
+    if none_allowed and value is None:
+        return
+
+    if not isinstance(value, UUID) or value.version != 4:
+        raise TypeError(f"{display_name} must be a UUID version 4")
+
+
 @validated()
 class BaseEntity:
     """A base entity without any field, that is able to validate itself."""
@@ -399,23 +461,23 @@ class BaseEntity:
 
 
 @validated()
-class BaseEntityWithId(BaseEntity):
-    """A base entity with an ``id``, that is able to validate itself.
+class BaseEntityWithIdentifier(BaseEntity):
+    """A base entity with an ``identifier``, that is able to validate itself.
 
     Attributes
     ----------
-    id : int
-        The identifier of the instance. Validated to be a positive integer.
+    identifier : UUID
+        The identifier of the instance. Validated to be a UUID version 4.
 
     """
 
-    id: int = required_field(int, frozen=True)
+    identifier: UUID = required_field(UUID, frozen=True)
 
-    @field_validator(id)
-    def validate_id_is_positive_integer(  # noqa  # pylint: disable=unused-argument
+    @field_validator(identifier)
+    def validate_id_is_uuid(  # noqa  # pylint: disable=unused-argument
         self, field: "Attribute[_T]", value: _T
     ) -> None:
-        """Validate that the ``id`` field is a positive integer.
+        """Validate that the ``identifier`` field is a uuid.
 
         Parameters
         ----------
@@ -425,8 +487,8 @@ class BaseEntityWithId(BaseEntity):
             The value to validate for the `field`.
 
         """
-        validate_positive_integer(
+        validate_uuid(
             value=value,
             none_allowed=False,
-            display_name=f"{self.__class__.__name__}.id",
+            display_name=f"{self.__class__.__name__}.identifier",
         )
