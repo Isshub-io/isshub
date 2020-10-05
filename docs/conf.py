@@ -93,6 +93,7 @@ html_use_old_search_snippets = True
 # -- Run apidoc when building the documentation-------------------------------
 
 napoleon_use_ivar = True
+autodoc_member_order = "bysource"
 add_module_names = False
 
 
@@ -140,7 +141,7 @@ def run_gherkindoc(_):
             "--toc-name",
             "index",
             "--maxtocdepth",
-            "5",
+            "4",  # avoid scenarios for ``isshub.domain.contexts`` (may to too much/not enough later)
         ]
     )
 

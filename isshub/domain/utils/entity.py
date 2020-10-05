@@ -26,7 +26,10 @@ if TYPE_CHECKING:
 else:
 
     class Attribute(Generic[_T]):
-        """Class for typing when not using mypy, for example when using ``get_type_hints``."""
+        """Class for typing when not using mypy, for example when using ``get_type_hints``.
+
+        :meta private:
+        """
 
 
 class _InstanceOfSelfValidator(
@@ -206,7 +209,7 @@ def validated() -> Any:
     TypeError: ("'my_field' must be <class 'str'> (got None that is a <class 'NoneType'>)...
 
     """
-    return attr.s(slots=True, kw_only=True)
+    return attr.s(slots=True, kw_only=True, eq=False)
 
 
 TValidateMethod = TypeVar(
@@ -462,7 +465,7 @@ class BaseEntity:
 
 @validated()
 class BaseEntityWithIdentifier(BaseEntity):
-    """A base entity with an ``identifier``, that is able to validate itself.
+    """A base entity with an :obj:`~BaseEntityWithIdentifier.identifier`, that is able to validate itself.
 
     Attributes
     ----------
@@ -477,12 +480,12 @@ class BaseEntityWithIdentifier(BaseEntity):
     def validate_id_is_uuid(  # noqa  # pylint: disable=unused-argument
         self, field: "Attribute[_T]", value: _T
     ) -> None:
-        """Validate that the ``identifier`` field is a uuid.
+        """Validate that the :obj:`BaseEntityWithIdentifier.identifier` field is a uuid.
 
         Parameters
         ----------
         field : Any
-            The field to validate. Passed via the ``@field_validator`` decorator.
+            The field to validate.
         value : Any
             The value to validate for the `field`.
 
@@ -492,3 +495,36 @@ class BaseEntityWithIdentifier(BaseEntity):
             none_allowed=False,
             display_name=f"{self.__class__.__name__}.identifier",
         )
+
+    def __hash__(self) -> int:
+        """Compute the hash of the entity for python internal hashing.
+
+        The hash is purely based on the entity's identifier, ie two different with the same
+        identifier will share the same hash. And as it's the same for ``__eq__`` method, two
+        different instances of the same entity class with the same identifier will always have the
+        same hash.
+
+        Returns
+        -------
+        int
+            The hash for the entity
+
+        """
+        return hash(self.identifier)
+
+    def __eq__(self, other: Any) -> bool:
+        """Check if the `other` object is the same as the current entity.
+
+        Parameters
+        ----------
+        other : Any
+            The object to compare with the actual entity.
+
+        Returns
+        -------
+        bool
+            ``True`` if the given `other` object is an instance of the same class as the current
+            entity, with the same identifier.
+
+        """
+        return self.__class__ is other.__class__ and self.identifier == other.identifier

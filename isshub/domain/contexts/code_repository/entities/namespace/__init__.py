@@ -1,4 +1,4 @@
-"""Package defining the ``Namespace`` entity."""
+"""Package defining the :obj:`Namespace` entity."""
 
 import enum
 from typing import Any, Optional
@@ -50,14 +50,14 @@ class Namespace(BaseEntityWithIdentifier):
     def validate_namespace_is_not_in_a_loop(  # noqa  # pylint: disable=unused-argument
         self, field: Any, value: Any
     ) -> None:
-        """Validate that the ``namespace`` field is not in a loop.
+        """Validate that the :obj:`Namespace.namespace` field is not in a loop.
 
         Being in a loop means that one of the descendants is the parent of one of the ascendants.
 
         Parameters
         ----------
         field : Any
-            The field to validate. Passed via the ``@field_validator`` decorator.
+            The field to validate.
         value : Any
             The value to validate for the `field`.
 

@@ -1,4 +1,5 @@
 """Module holding BDD tests for isshub Repository code_repository entity."""
+from functools import partial
 from uuid import uuid4
 
 import pytest
@@ -18,14 +19,18 @@ from ...namespace.tests.fixtures import namespace
 from .fixtures import repository_factory
 
 
+FEATURE_FILE = "../features/describe.feature"
+scenario = partial(scenario, FEATURE_FILE)
+
+
 @mark.parametrize(["value", "exception"], uuid4_only)
-@scenario("../features/describe.feature", "A Repository identifier is a uuid")
+@scenario("A repository identifier is a uuid")
 def test_repository_identifier_is_a_uuid(value, exception):
     pass
 
 
 @mark.parametrize(["value", "exception"], string_only)
-@scenario("../features/describe.feature", "A Repository name is a string")
+@scenario("A repository name is a string")
 def test_repository_name_is_a_string(value, exception):
     pass
 
@@ -34,15 +39,12 @@ def test_repository_name_is_a_string(value, exception):
     ["value", "exception"],
     [(pytest.lazy_fixture("namespace"), None), ("foo", TypeError), (1, TypeError)],
 )
-@scenario("../features/describe.feature", "A Repository namespace is a Namespace")
+@scenario("A repository namespace is a Namespace")
 def test_repository_namespace_is_a_namespace(value, exception):
     pass
 
 
-scenarios("../features/describe.feature")
-
-
-@given("a Repository", target_fixture="repository")
+@given("a repository", target_fixture="repository")
 def a_repository(repository_factory):
     return repository_factory()
 
@@ -69,7 +71,7 @@ def repository_field_is_mandatory(repository_factory, field_name):
     check_field_not_nullable(repository_factory, field_name)
 
 
-@scenario("../features/describe.feature", "A Repository identifier cannot be changed")
+@scenario("A repository identifier cannot be changed")
 def test_repository_identifier_cannot_be_changed():
     pass
 
@@ -78,3 +80,7 @@ def test_repository_identifier_cannot_be_changed():
 def repository_identifier_cannot_be_changed(repository):
     with pytest.raises(FrozenAttributeError):
         repository.identifier = uuid4()
+
+
+# To make pytest-bdd fail if some scenarios are not implemented. KEEP AT THE END
+scenarios(FEATURE_FILE)

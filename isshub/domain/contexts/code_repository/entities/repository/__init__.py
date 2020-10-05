@@ -1,4 +1,4 @@
-"""Package defining the ``Repository`` entity."""
+"""Package defining the :obj:`Repository` entity."""
 
 from isshub.domain.contexts.code_repository.entities.namespace import Namespace
 from isshub.domain.utils.entity import (

@@ -72,6 +72,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/_build_txt/
 # Doc from code
 docs/source/
 # Doc from bdd features

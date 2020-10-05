@@ -1,41 +1,41 @@
-Feature: Describing a Repository
+Feature: Describing a repository
 
-    Scenario: A Repository has an identifier
-        Given a Repository
+    Scenario: A repository has an identifier
+        Given a repository
         Then it must have a field named identifier
 
-    Scenario: A Repository identifier is a uuid
-        Given a Repository
+    Scenario: A repository identifier is a uuid
+        Given a repository
         Then its identifier must be a uuid
 
-    Scenario: A Repository identifier is mandatory
-        Given a Repository
+    Scenario: A repository identifier is mandatory
+        Given a repository
         Then its identifier is mandatory
 
-    Scenario: A Repository identifier cannot be changed
-        Given a Repository
+    Scenario: A repository identifier cannot be changed
+        Given a repository
         Then its identifier cannot be changed
 
-    Scenario: A Repository has a name
-        Given a Repository
+    Scenario: A repository has a name
+        Given a repository
         Then it must have a field named name
 
-    Scenario: A Repository name is a string
-        Given a Repository
+    Scenario: A repository name is a string
+        Given a repository
         Then its name must be a string
 
-    Scenario: A Repository name is mandatory
-        Given a Repository
+    Scenario: A repository name is mandatory
+        Given a repository
         Then its name is mandatory
 
-    Scenario: A Repository has a namespace
-        Given a Repository
+    Scenario: A repository has a namespace
+        Given a repository
         Then it must have a field named namespace
 
-    Scenario: A Repository namespace is a Namespace
-        Given a Repository
+    Scenario: A repository namespace is a Namespace
+        Given a repository
         Then its namespace must be a Namespace
 
-    Scenario: A Repository namespace is mandatory
-        Given a Repository
+    Scenario: A repository namespace is mandatory
+        Given a repository
         Then its namespace is mandatory
