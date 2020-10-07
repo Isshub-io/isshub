@@ -159,7 +159,15 @@ def run_gherkindoc(_):
         rst_file = os.path.join(output_path, f"{base_name}-toc.rst")
         with open(rst_file, "r") as file_d:
             rst_lines = file_d.readlines()
-        rst_lines.insert(3, f".. graphviz:: {base_name}-entities.dot\n\n")
+        rst_lines.insert(
+            3,
+            "Diagrams\n--------\n\n"
+            "Entities\n~~~~~~~~\n\n"
+            f".. graphviz:: {base_name}-entities.dot\n\n"
+            "Repositories\n~~~~~~~~~~~~\n\n"
+            f".. graphviz:: {base_name}-repositories.dot\n\n"
+            "BDD features\n------------\n\n",
+        )
         with open(rst_file, "w") as file_d:
             file_d.write("".join(rst_lines))
 

@@ -3,8 +3,10 @@
 """Make the diagrams of entities for each isshub domain contexts."""
 
 import importlib
+import inspect
 import os.path
 import pkgutil
+import re
 import sys
 from enum import Enum
 from types import ModuleType
@@ -12,6 +14,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Iterable,
     List,
     Optional,
     Set,
@@ -23,12 +26,28 @@ from typing import (
 
 import attr
 
+from isshub.domain import contexts
+from isshub.domain.utils.entity import BaseEntity
+from isshub.domain.utils.repository import AbstractRepository
+
 
 if TYPE_CHECKING:
     from attr import _Fields  # pylint: disable=no-name-in-module
 
-from isshub.domain import contexts
-from isshub.domain.utils.entity import BaseEntity
+    try:
+        from typing import get_args, get_origin  # type: ignore
+    except ImportError:
+        # pylint: disable=C,W
+        # this happen in my python 3.8 virtualenv: it shouldn't but can't figure out the problem
+        def get_args(tp: Any) -> Any:  # noqa
+            return getattr(tp, "__args__", ())
+
+        def get_origin(tp: Any) -> Any:  # noqa
+            return getattr(tp, "__origin__", None)
+
+
+else:
+    from typing import get_args, get_origin
 
 
 def import_submodules(
@@ -133,6 +152,97 @@ NoneType = type(None)
 AlignLeft = chr(92) + "l"  # "\l"
 
 
+def filter_classes_from_module(
+    classes: Dict[str, Type], module_name: str
+) -> Dict[str, Type]:
+    """Restrict the given classes to the one found in the given module.
+
+    Parameters
+    ----------
+    classes : Dict[str, Type]
+        A dict of classes from which to extract the ones to return. Full python path as keys, and
+        the classes as values.
+    module_name : str
+        The python path of the module for which we want the classes
+
+    Returns
+    -------
+    Dict[str, Type]
+        The filtered `classes` (same format as the given `classes` argument)
+
+    """
+    prefix = f"{module_name}."
+    return {
+        class_name: klass
+        for class_name, klass in classes.items()
+        if class_name.startswith(prefix)
+    }
+
+
+def render_dot_file(output_path: str, name: str, content: str) -> None:
+    """Save `content` of a dot file.
+
+    Parameters
+    ----------
+    output_path : str
+        The directory where to store the dot file
+    name : str
+        The base name (without extension) of the final file
+    content : str
+        The content to save in the dot file
+    """
+    dot_path = os.path.join(output_path, f"{name}.dot")
+    print(f"Writing diagram {dot_path}")
+    with open(dot_path, "w") as file_d:
+        file_d.write(content)
+
+
+def render_dot_record(identifier: str, title: str, lines: Iterable[str]) -> str:
+    """Render a record in a dot file.
+
+    Parameters
+    ----------
+    identifier : str
+        The identifier of the record in the dot file
+    title : str
+        The title of the record. Will be centered.
+    lines : Iterable[str]
+        The lines of the record. Will be left aligned.
+
+    Returns
+    -------
+    str
+        The line representing the record for the dot file.
+
+    """
+    lines_parts = "|".join(f"{line} {AlignLeft}" for line in lines)
+    return f'{identifier} [label="{title}|{lines_parts}"]'
+
+
+def render_dot_link(source: str, dest: str, label: Optional[str]) -> str:
+    """Render a link between a `source` and a `dest` in a dot file.
+
+    Parameters
+    ----------
+    source : str
+        The source of the link in the dot file
+    dest : str
+        The destination of the link in the dot file
+    label : Optional[str]
+        If set, will be the label of the link.
+
+    Returns
+    -------
+    str
+        The line representing the link for the dot file.
+
+    """
+    result = f"{source} -> {dest}"
+    if label:
+        result += f' [label="{label}"]'
+    return result
+
+
 def render_enum(enum: Type[Enum]) -> Tuple[str, str]:
     """Render the given `enum` to be incorporated in a dot file.
 
@@ -146,15 +256,42 @@ def render_enum(enum: Type[Enum]) -> Tuple[str, str]:
     str
         The name of the enum as a dot identifier
     str
-        The definition of the enum to represent it in the graph
+        The definition of the enum to represent it in the diagram
 
     """
     dot_name = get_dot_identifier(get_python_path(enum))
-    enum_parts = "|".join(f"{value.value} {AlignLeft}" for value in enum)
-    return (
-        dot_name,
-        f'{dot_name} [label="<__class__> Enum: {enum.__name__}|{enum_parts}"]',
+    return dot_name, render_dot_record(
+        dot_name, f"<__class__> Enum: {enum.__name__}", (value.value for value in enum)
     )
+
+
+def get_optional_type(type_: Any) -> Union[None, Any]:
+    """Get the optional type defined in the given `type_`.
+
+    Only works for one of these syntax:
+
+      - ``Optional[TheType]``
+      - ``Union[TheType, None'``
+
+    Parameters
+    ----------
+    type_ : Any
+        The type (from from a call to ``get_type_hints``) to analyse
+
+    Returns
+    -------
+    Union[None, Any]
+        Will be ``None`` if the `type_`
+
+    """
+    if get_origin(type_) is not Union:
+        return None
+    args = get_args(type_)
+    if len(args) != 2:
+        return None
+    if NoneType not in args:
+        return None
+    return [arg for arg in args if arg is not NoneType][0]
 
 
 def validate_entity(
@@ -206,19 +343,20 @@ def validate_entity(
     for field_name, field_type in types.items():
         required = True
 
-        if getattr(field_type, "__origin__", None) is Union:
-            if len(field_type.__args__) != 2:
+        if get_origin(field_type) is Union:
+            args = get_args(field_type)
+            if len(args) != 2:
                 raise NotImplementedError(
                     f"{name}.{field_name} : {field_type}"
                     " - Union type with more that two choices is not implemented"
                 )
-            if NoneType not in field_type.__args__:
+            if NoneType not in args:
                 raise NotImplementedError(
                     f"{name}.{field_name} : {field_type}"
                     " - Union type without None is not implemented"
                 )
             required = False
-            field_type = [arg for arg in field_type.__args__ if arg is not NoneType][0]
+            field_type = [arg for arg in args if arg is not NoneType][0]
 
         if field_type.__module__.startswith("isshub") and not issubclass(
             field_type, Enum
@@ -234,7 +372,7 @@ def validate_entity(
     return fields
 
 
-def render_link(
+def render_entity_link(
     source_name: str,
     field_name: str,
     dest_name: str,
@@ -272,7 +410,9 @@ def render_link(
     except Exception:  # pylint: disable=broad-except
         link_label = "(" + ("1" if required else "0..1") + ")"
 
-    return f'{source_name}:{field_name} -> {dest_name}:__class__ [label="{link_label}"]'
+    return render_dot_link(
+        f"{source_name}:{field_name}", f"{dest_name}:__class__", link_label
+    )
 
 
 def render_entity(
@@ -329,24 +469,24 @@ def render_entity(
             link_to = get_dot_identifier(get_python_path(field_type))
 
         if link_to:
-            links.add(render_link(dot_name, field_name, link_to, required, attr_fields))
+            links.add(
+                render_entity_link(dot_name, field_name, link_to, required, attr_fields)
+            )
 
         fields[field_name] = field_type.__name__
         if not required:
             fields[field_name] = f"{fields[field_name]} (optional)"
 
-    fields_parts = "|".join(
-        f"<{f_name}> {f_name} : {f_type} {AlignLeft}"
-        for f_name, f_type in fields.items()
+    lines[dot_name] = render_dot_record(
+        dot_name,
+        f"<__class__> Entity: {entity.__name__}",
+        (f"<{f_name}> {f_name} : {f_type}" for f_name, f_type in fields.items()),
     )
-    lines[
-        dot_name
-    ] = f'{dot_name} [label="<__class__> Entity: {entity.__name__}|{fields_parts}"]'
 
     return lines, links
 
 
-def make_domain_context_graph(
+def make_domain_context_entities_diagram(
     context_name: str, subclasses: Dict[str, Type[BaseEntity]], output_path: str
 ) -> None:
     """Make the graph of entities in the given contexts.
@@ -356,18 +496,14 @@ def make_domain_context_graph(
     context_name : str
         The name of the context, represented by the python path of its module
     subclasses : Dict[str, Type[BaseEntity]]
-        All the subclasses of ``BaseEntity`` from which to extract the modules to render.
+        All the subclasses of ``BaseEntity`` from which to extract the ones to render.
         Only subclasses present in the given context will be rendered.
     output_path : str
         The path where to save the generated graph
 
     """
     # restrict the subclasses of ``BaseEntity`` to the ones in the given module name
-    context_subclasses = {
-        subclass_name: subclass
-        for subclass_name, subclass in subclasses.items()
-        if subclass_name.startswith(context_name + ".")
-    }
+    context_subclasses = filter_classes_from_module(subclasses, context_name)
 
     # render entities and all links between them
     entity_lines, links = {}, set()
@@ -385,7 +521,7 @@ def make_domain_context_graph(
     dot_file_content = (
         """\
 digraph domain_context_entities {
-  label = "Domain context [%s]"
+  label = "Domain context entities [%s]"
   #labelloc = "t"
   rankdir=LR
   node[shape=record]
@@ -396,10 +532,132 @@ digraph domain_context_entities {
         dot_file_content += f"  {line}\n"
     dot_file_content += "}"
 
-    dot_path = os.path.join(output_path, f"{context_name}-entities.dot")
-    print(f"Writing graph for domain context {context_name} in {dot_path}")
-    with open(dot_path, "w") as file_d:
-        file_d.write(dot_file_content)
+    render_dot_file(output_path, f"{context_name}-entities", dot_file_content)
+
+
+re_optional = re.compile(r"(?:typing\.)?Union\[(.*), NoneType]")
+re_literal = re.compile(r"(?:typing\.)?Literal\[(.*?)]")
+
+
+def render_repository(  # pylint: disable=too-many-locals
+    name: str, repository: Type[AbstractRepository], context: str
+) -> str:
+    """Render the content of the dot file for the given `repository`.
+
+    Parameters
+    ----------
+    name : str
+        The name of the `repository`
+    repository : Type[AbstractRepository]
+        The repository to render
+    context : str
+        The name of the context  containing the `repository`
+
+    Returns
+    -------
+    str
+        The content of the dot file for the diagram of the given `repository`
+
+    """
+    members = {
+        name: value
+        for name, value in inspect.getmembers(repository)
+        if not name.startswith("_")
+    }
+    methods = {
+        name: value for name, value in members.items() if inspect.isfunction(value)
+    }
+    entity_class = members["entity_class"]
+
+    re_context = re.compile(context + r".(?:\w+\.)*(\w+)")
+
+    def optimize_annotation(type_: Any) -> str:  # pylint: disable=W
+        if isinstance(type_, type):
+            return type_.__name__
+        result = str(type_)
+        for regexp, replacement in (
+            (re_context, r"\1"),
+            (re_literal, r"\1"),
+            (re_optional, r"Optional[\1]"),
+        ):
+            result = regexp.sub(replacement, result)
+        return result.replace("~Entity", entity_class.__name__).replace("typing.", "")
+
+    methods_lines = []
+    for method_name, method in methods.items():
+        signature = inspect.signature(method)
+        params = []
+        for param_name, param in signature.parameters.items():
+            if param_name == "self":
+                continue
+            params.append(
+                "".join(
+                    (
+                        param_name,
+                        ""
+                        if not param.annotation or param.annotation is param.empty
+                        else ": %s" % optimize_annotation(param.annotation),
+                        "" if param.default is param.empty else " = %s" % param.default,
+                    )
+                )
+            )
+        methods_lines.append(
+            f"{method_name}(%s)%s"
+            % (
+                ", ".join(params),
+                ""
+                if not signature.return_annotation
+                or signature.return_annotation is signature.empty
+                else " → %s" % optimize_annotation(signature.return_annotation),
+            )
+        )
+
+    return render_dot_record(
+        get_dot_identifier(get_python_path(repository)),
+        f"{repository.__name__} (for {entity_class.__name__} entity)",
+        methods_lines,
+    )
+
+
+def make_domain_context_repositories_diagram(
+    context_name: str, subclasses: Dict[str, Type[AbstractRepository]], output_path: str
+) -> None:
+    """Make the graph of entities in the given contexts.
+
+    Parameters
+    ----------
+    context_name : str
+        The name of the context, represented by the python path of its module
+    subclasses : Dict[str, Type[AbstractRepository]]
+        All the subclasses of ``AbstractRepository`` from which to extract the ones to render.
+        Only subclasses present in the given context will be rendered.
+    output_path : str
+        The path where to save the generated graph
+
+    """
+    # restrict the subclasses of ``AbstractRepository`` to the ones in the given module name
+    context_subclasses = filter_classes_from_module(subclasses, context_name)
+    rendered_repositories = [
+        render_repository(subclass_name, subclass, context_name)
+        for subclass_name, subclass in context_subclasses.items()
+    ]
+
+    # compose the content of the dot file
+    dot_file_content = (
+        """\
+digraph domain_context_repositories {
+  label = "Domain context repositories [%s]"
+  #labelloc = "t"
+  rankdir=LR
+  node[shape=record]
+"""
+        % context_name
+    )
+    for line in rendered_repositories:
+        dot_file_content += f"  {line}\n"
+    dot_file_content += "}"
+
+    render_dot_file(output_path, f"{context_name}-repositories", dot_file_content)
 
 
 def make_domain_contexts_diagrams(output_path: str) -> None:
@@ -411,16 +669,19 @@ def make_domain_contexts_diagrams(output_path: str) -> None:
         The path where to save the generated diagrams
 
     """
-    # we need to import all python files (except tests) to find all subclasses of ``BaseEntity``
+    # we need to import all python files (except tests) to be sure we have access to all python code
     import_submodules(contexts, skip_names=["tests"])
-    subclasses = get_final_subclasses(BaseEntity)
+
+    entities = get_final_subclasses(BaseEntity)
+    repositories = get_final_subclasses(AbstractRepository)
 
     # we render each context independently, assuming that each one is directly at the root of
     # the ``contexts`` package
     for module in pkgutil.iter_modules(
         path=contexts.__path__, prefix=contexts.__name__ + "."  # type: ignore
     ):
-        make_domain_context_graph(module.name, subclasses, output_path)
+        make_domain_context_entities_diagram(module.name, entities, output_path)
+        make_domain_context_repositories_diagram(module.name, repositories, output_path)
 
 
 if __name__ == "__main__":

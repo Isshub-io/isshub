@@ -1,7 +1,7 @@
 """Package defining the repository for the :obj:`.Namespace` entity."""
 
 import abc
-from typing import Iterable, Union
+from typing import Iterable, Literal, Union  # type: ignore
 
 from .....utils.repository import AbstractInMemoryRepository, AbstractRepository
 from ...entities import Namespace
@@ -13,7 +13,9 @@ class AbstractNamespaceRepository(
     """Base repository for the :obj:`.Namespace` entity."""
 
     @abc.abstractmethod
-    def for_namespace(self, namespace: Union[Namespace, None]) -> Iterable[Namespace]:
+    def for_namespace(
+        self, namespace: Union[Namespace, Literal[None]]
+    ) -> Iterable[Namespace]:
         """Iterate on namespaces found in the given `namespace`, or with no namespace if ``None``.
 
         Parameters
@@ -64,7 +66,9 @@ class InMemoryNamespaceRepository(
             )
         return super().add(entity)
 
-    def for_namespace(self, namespace: Union[Namespace, None]) -> Iterable[Namespace]:
+    def for_namespace(
+        self, namespace: Union[Namespace, Literal[None]]
+    ) -> Iterable[Namespace]:
         """Iterate on namespaces found in the given `namespace`, or with no namespace if ``None``.
 
         For the parameters, see :obj:`AbstractNamespaceRepository.for_namespace`
