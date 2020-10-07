@@ -1,12 +1,13 @@
 """Validation helpers for BDD tests for isshub entities."""
 
 from typing import Any, Callable, List, Optional, Tuple, Type
+from uuid import UUID
 
 import pytest
 
 from attr.exceptions import FrozenAttributeError
 
-from isshub.domain.utils.entity import BaseModel
+from isshub.domain.utils.entity import BaseEntity
 
 
 ValuesValidation = List[Tuple[Any, Optional[Type[Exception]]]]
@@ -29,13 +30,19 @@ positive_integer_only: ValuesValidation = integer_only + no_zero
 
 string_only: ValuesValidation = [("foo", None), (1, TypeError), (-0.1, TypeError)]
 
+uuid4_only: ValuesValidation = [
+    (UUID("19f49bc8-06e5-11eb-8465-bf44725d7bd3"), TypeError),
+    ("7298d61a-f08f-4f83-b75e-934e786eb43d", TypeError),
+    (UUID("7298d61a-f08f-4f83-b75e-934e786eb43d"), None),
+]
 
-def check_field(obj: BaseModel, field_name: str) -> None:
+
+def check_field(obj: BaseEntity, field_name: str) -> None:
     """Assert that the given `obj` has an attribute named `field_name`.
 
     Parameters
     ----------
-    obj : BaseModel
+    obj : BaseEntity
         The object to test
     field_name : str
         The field name to search for
@@ -50,7 +57,7 @@ def check_field(obj: BaseModel, field_name: str) -> None:
 
 
 def check_field_value(
-    factory: Callable[..., BaseModel],
+    factory: Callable[..., BaseEntity],
     field_name: str,
     value: Any,
     exception: Optional[Type[Exception]],
@@ -60,7 +67,7 @@ def check_field_value(
 
     Parameters
     ----------
-    factory : Callable[...,BaseModel]
+    factory : Callable[...,BaseEntity]
         The factory to use to create the object to test
     field_name : str
         The name of the field to check
@@ -109,13 +116,13 @@ def check_field_value(
 
 
 def check_field_not_nullable(
-    factory: Callable[..., BaseModel], field_name: str, **factory_kwargs: Any
+    factory: Callable[..., BaseEntity], field_name: str, **factory_kwargs: Any
 ) -> None:
     """Assert that an object cannot have a specific field set to ``None``.
 
     Parameters
     ----------
-    factory : Callable[...,BaseModel]
+    factory : Callable[...,BaseEntity]
         The factory to use to create the object to test
     field_name : str
         The name of the field to check
@@ -147,13 +154,13 @@ def check_field_not_nullable(
 
 
 def check_field_nullable(
-    factory: Callable[..., BaseModel], field_name: str, **factory_kwargs: Any
+    factory: Callable[..., BaseEntity], field_name: str, **factory_kwargs: Any
 ) -> None:
     """Assert that an object can have a specific field set to ``None``.
 
     Parameters
     ----------
-    factory : Callable[...,BaseModel]
+    factory : Callable[...,BaseEntity]
         The factory to use to create the object to test
     field_name : str
         The name of the field to check

@@ -1,4 +1,6 @@
-"""Module holding BDD tests for isshub Namespace code_repository entity."""
+"""Module holding BDD tests for isshub Namespace code_repository entity as defined in ``describe.feature``."""
+from functools import partial
+from uuid import uuid4
 
 import pytest
 from pytest import mark
@@ -11,21 +13,25 @@ from isshub.domain.utils.testing.validation import (
     check_field_not_nullable,
     check_field_nullable,
     check_field_value,
-    positive_integer_only,
     string_only,
+    uuid4_only,
 )
 
 from .fixtures import namespace, namespace_factory
 
 
-@mark.parametrize(["value", "exception"], positive_integer_only)
-@scenario("../features/describe.feature", "A Namespace id is a positive integer")
-def test_namespace_id_is_a_positive_integer(value, exception):
+FEATURE_FILE = "../features/describe.feature"
+scenario = partial(scenario, FEATURE_FILE)
+
+
+@mark.parametrize(["value", "exception"], uuid4_only)
+@scenario("A namespace identifier is a uuid")
+def test_namespace_identifier_is_a_uuid(value, exception):
     pass
 
 
 @mark.parametrize(["value", "exception"], string_only)
-@scenario("../features/describe.feature", "A Namespace name is a string")
+@scenario("A namespace name is a string")
 def test_namespace_name_is_a_string(value, exception):
     pass
 
@@ -34,7 +40,7 @@ def test_namespace_name_is_a_string(value, exception):
     ["value", "exception"],
     [(pytest.lazy_fixture("namespace"), None), ("foo", TypeError), (1, TypeError)],
 )
-@scenario("../features/describe.feature", "A Namespace namespace is a Namespace")
+@scenario("A namespace namespace is a namespace")
 def test_namespace_namespace_is_a_namespace(value, exception):
     pass
 
@@ -43,21 +49,18 @@ def test_namespace_namespace_is_a_namespace(value, exception):
     ["value", "exception"],
     [(NamespaceKind.GROUP, None), ("foo", TypeError), (1, TypeError)],
 )
-@scenario("../features/describe.feature", "A Namespace kind is a NamespaceKind")
+@scenario("A namespace kind is a NamespaceKind")
 def test_namespace_kind_is_a_namespacekind(value, exception):
     pass
 
 
 @mark.parametrize(["value", "exception"], string_only)
-@scenario("../features/describe.feature", "A Namespace description is a string")
+@scenario("A namespace description is a string")
 def test_namespace_description_is_a_string(value, exception):
     pass
 
 
-scenarios("../features/describe.feature")
-
-
-@given("a Namespace", target_fixture="namespace")
+@given("a namespace", target_fixture="namespace")
 def a_namespace(namespace_factory):
     return namespace_factory()
 
@@ -89,18 +92,18 @@ def namespace_field_is_optional(namespace_factory, field_name):
     check_field_nullable(namespace_factory, field_name)
 
 
-@scenario("../features/describe.feature", "A Namespace id cannot be changed")
-def test_namespace_id_cannot_be_changed():
+@scenario("A namespace identifier cannot be changed")
+def test_namespace_identifier_cannot_be_changed():
     pass
 
 
-@then("its id cannot be changed")
-def namespace_id_cannot_be_changed(namespace):
+@then("its identifier cannot be changed")
+def namespace_identifier_cannot_be_changed(namespace):
     with pytest.raises(FrozenAttributeError):
-        namespace.id = namespace.id + 1
+        namespace.identifier = uuid4()
 
 
-@scenario("../features/describe.feature", "A Namespace cannot be contained in itself")
+@scenario("A namespace cannot be contained in itself")
 def test_namespace_namespace_cannot_be_itself():
     pass
 
@@ -112,17 +115,17 @@ def namespace_namespace_cannot_be_itself(namespace):
         namespace.validate()
 
 
-@scenario("../features/describe.feature", "A Namespace namespace cannot be in a loop")
+@scenario("A namespace namespace cannot be in a loop")
 def test_namespace_namespace_cannot_be_in_a_loop():
     pass
 
 
-@given("a second Namespace", target_fixture="namespace2")
+@given("a second namespace", target_fixture="namespace2")
 def a_second_namespace(namespace_factory):
     return namespace_factory()
 
 
-@given("a third Namespace", target_fixture="namespace3")
+@given("a third namespace", target_fixture="namespace3")
 def a_third_namespace(namespace_factory):
     return namespace_factory()
 
@@ -148,3 +151,7 @@ def namespace_relationships_cannot_create_a_loop(namespace, namespace2, namespac
     namespace3.validate()
     namespace2.validate()
     namespace.validate()
+
+
+# To make pytest-bdd fail if some scenarios are not implemented. KEEP AT THE END
+scenarios(FEATURE_FILE)

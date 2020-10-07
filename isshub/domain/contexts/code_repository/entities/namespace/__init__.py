@@ -1,10 +1,10 @@
-"""Package defining the ``Namespace`` entity."""
+"""Package defining the :obj:`Namespace` entity."""
 
 import enum
 from typing import Any, Optional
 
 from isshub.domain.utils.entity import (
-    BaseModelWithId,
+    BaseEntityWithIdentifier,
     field_validator,
     optional_field,
     required_field,
@@ -20,13 +20,13 @@ class NamespaceKind(enum.Enum):
     GROUP = "Group"
 
 
-@validated()  # type: ignore
-class Namespace(BaseModelWithId):
+@validated()
+class Namespace(BaseEntityWithIdentifier):
     """A namespace can contain namespaces and repositories.
 
     Attributes
     ----------
-    id : int
+    identifier : UUID
         The unique identifier of the namespace
     name : str
         The name of the namespace. Unique in its parent namespace.
@@ -39,27 +39,25 @@ class Namespace(BaseModelWithId):
 
     """
 
-    name: str = required_field(str)  # type: ignore
-    kind: NamespaceKind = required_field(  # type: ignore
-        NamespaceKind, relation_verbose_name="is a"
-    )
-    namespace: Optional["Namespace"] = optional_field(  # type: ignore
+    name: str = required_field(str)
+    kind: NamespaceKind = required_field(NamespaceKind, relation_verbose_name="is a")
+    namespace: Optional["Namespace"] = optional_field(
         "self", relation_verbose_name="may belongs to"
     )
-    description: Optional[str] = optional_field(str)  # type: ignore
+    description: Optional[str] = optional_field(str)
 
-    @field_validator(namespace)  # type: ignore
+    @field_validator(namespace)
     def validate_namespace_is_not_in_a_loop(  # noqa  # pylint: disable=unused-argument
         self, field: Any, value: Any
     ) -> None:
-        """Validate that the ``namespace`` field is not in a loop.
+        """Validate that the :obj:`Namespace.namespace` field is not in a loop.
 
         Being in a loop means that one of the descendants is the parent of one of the ascendants.
 
         Parameters
         ----------
         field : Any
-            The field to validate. Passed via the ``@field_validator`` decorator.
+            The field to validate.
         value : Any
             The value to validate for the `field`.
 

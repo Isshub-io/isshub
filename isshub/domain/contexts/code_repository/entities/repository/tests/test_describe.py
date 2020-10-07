@@ -1,4 +1,6 @@
 """Module holding BDD tests for isshub Repository code_repository entity."""
+from functools import partial
+from uuid import uuid4
 
 import pytest
 from pytest import mark
@@ -9,22 +11,26 @@ from isshub.domain.utils.testing.validation import (
     check_field,
     check_field_not_nullable,
     check_field_value,
-    positive_integer_only,
     string_only,
+    uuid4_only,
 )
 
 from ...namespace.tests.fixtures import namespace
 from .fixtures import repository_factory
 
 
-@mark.parametrize(["value", "exception"], positive_integer_only)
-@scenario("../features/describe.feature", "A Repository id is a positive integer")
-def test_repository_id_is_a_positive_integer(value, exception):
+FEATURE_FILE = "../features/describe.feature"
+scenario = partial(scenario, FEATURE_FILE)
+
+
+@mark.parametrize(["value", "exception"], uuid4_only)
+@scenario("A repository identifier is a uuid")
+def test_repository_identifier_is_a_uuid(value, exception):
     pass
 
 
 @mark.parametrize(["value", "exception"], string_only)
-@scenario("../features/describe.feature", "A Repository name is a string")
+@scenario("A repository name is a string")
 def test_repository_name_is_a_string(value, exception):
     pass
 
@@ -33,15 +39,12 @@ def test_repository_name_is_a_string(value, exception):
     ["value", "exception"],
     [(pytest.lazy_fixture("namespace"), None), ("foo", TypeError), (1, TypeError)],
 )
-@scenario("../features/describe.feature", "A Repository namespace is a Namespace")
+@scenario("A repository namespace is a Namespace")
 def test_repository_namespace_is_a_namespace(value, exception):
     pass
 
 
-scenarios("../features/describe.feature")
-
-
-@given("a Repository", target_fixture="repository")
+@given("a repository", target_fixture="repository")
 def a_repository(repository_factory):
     return repository_factory()
 
@@ -68,12 +71,16 @@ def repository_field_is_mandatory(repository_factory, field_name):
     check_field_not_nullable(repository_factory, field_name)
 
 
-@scenario("../features/describe.feature", "A Repository id cannot be changed")
-def test_repository_id_cannot_be_changed():
+@scenario("A repository identifier cannot be changed")
+def test_repository_identifier_cannot_be_changed():
     pass
 
 
-@then("its id cannot be changed")
-def repository_id_cannot_be_changed(repository):
+@then("its identifier cannot be changed")
+def repository_identifier_cannot_be_changed(repository):
     with pytest.raises(FrozenAttributeError):
-        repository.id = repository.id + 1
+        repository.identifier = uuid4()
+
+
+# To make pytest-bdd fail if some scenarios are not implemented. KEEP AT THE END
+scenarios(FEATURE_FILE)

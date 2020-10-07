@@ -3,18 +3,41 @@
 It is an adapter over the ``attrs`` external dependency.
 
 """
-
-# type: ignore
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generic,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
+from uuid import UUID
 
 import attr
 
 
-class _InstanceOfSelfValidator(
-    attr.validators._InstanceOfValidator  # pylint: disable=protected-access
-):
-    """Validator checking that the field holds an instance of its own model."""
+_T = TypeVar("_T")
 
-    def __call__(self, inst, attr, value):  # pylint: disable=redefined-outer-name
+if TYPE_CHECKING:
+    from attr.__init__ import Attribute  # isort:skip
+else:
+
+    class Attribute(Generic[_T]):
+        """Class for typing when not using mypy, for example when using ``get_type_hints``.
+
+        :meta private:
+        """
+
+
+class _InstanceOfSelfValidator(
+    attr.validators._InstanceOfValidator  # type: ignore  # pylint: disable=protected-access
+):
+    """Validator checking that the field holds an instance of its own entity."""
+
+    def __call__(self, inst, attr, value):  # type: ignore  # pylint: disable=redefined-outer-name
         """Validate that the `value` is an instance of the class of `inst`.
 
         For the parameters, see ``attr.validators._InstanceOfValidator``
@@ -24,7 +47,7 @@ class _InstanceOfSelfValidator(
 
 
 def instance_of_self() -> _InstanceOfSelfValidator:
-    """Return a validator checking that the field holds an instance of its own model.
+    """Return a validator checking that the field holds an instance of its own entity.
 
     Returns
     -------
@@ -34,16 +57,19 @@ def instance_of_self() -> _InstanceOfSelfValidator:
     return _InstanceOfSelfValidator(type=None)
 
 
-def optional_field(field_type, relation_verbose_name=None):
+def optional_field(
+    field_type: Union[Type[_T], str], relation_verbose_name: Optional[str] = None
+) -> Optional[_T]:
     """Define an optional field of the specified `field_type`.
 
     Parameters
     ----------
     field_type : Union[type, str]
-        The expected type of the field. Use the string "self" to reference the current field's model
+        The expected type of the field. Use the string "self" to reference the current field's
+        entity
     relation_verbose_name : Optional[str]
-        A verbose name to describe the relation between the model linked to the field, and the
-        model pointed by `field_type`
+        A verbose name to describe the relation between the entity linked to the field, and the
+        entity pointed by `field_type`
 
     Returns
     -------
@@ -51,82 +77,101 @@ def optional_field(field_type, relation_verbose_name=None):
         An ``attrs`` attribute, with a default value set to ``None``, and a validator checking
         that this field is optional and, if set, of the correct type.
 
+    Raises
+    ------
+    AssertionError
+        If `field_type` is a string and this string is not "self"
+
     Examples
     --------
-    >>> from isshub.domain.utils.entity import optional_field, validated, BaseModel
+    >>> from isshub.domain.utils.entity import optional_field, validated, BaseEntity
     >>>
     >>> @validated()
-    ... class MyModel(BaseModel):
+    ... class MyEntity(BaseEntity):
     ...     my_field: str = optional_field(str)
     >>>
     >>> from isshub.domain.utils.testing.validation import check_field_nullable
-    >>> check_field_nullable(MyModel, 'my_field', my_field='foo')
+    >>> check_field_nullable(MyEntity, 'my_field', my_field='foo')
 
     """
     metadata = {}
     if relation_verbose_name:
         metadata["relation_verbose_name"] = relation_verbose_name
 
+    assert not isinstance(field_type, str) or field_type == "self"
+
     return attr.ib(
         default=None,
         validator=attr.validators.optional(
             instance_of_self()
-            if field_type == "self"
+            if isinstance(field_type, str)
             else attr.validators.instance_of(field_type)
         ),
         metadata=metadata,
     )
 
 
-def required_field(field_type, frozen=False, relation_verbose_name=None):
+def required_field(
+    field_type: Union[Type[_T], str],
+    frozen: bool = False,
+    relation_verbose_name: Optional[str] = None,
+) -> _T:
     """Define a required field of the specified `field_type`.
 
     Parameters
     ----------
     field_type : Union[type, str]
-        The expected type of the field. Use the string "self" to reference the current field's model
+        The expected type of the field. Use the string "self" to reference the current field's
+        entity
     frozen : bool
         If set to ``False`` (the default), the field can be updated after being set at init time.
         If set to ``True``, the field can be set at init time but cannot be changed later, else a
         ``FrozenAttributeError`` exception will be raised.
     relation_verbose_name : Optional[str]
-        A verbose name to describe the relation between the model linked to the field, and the
-        model pointed by `field_type`
+        A verbose name to describe the relation between the entity linked to the field, and the
+        entity pointed by `field_type`
 
     Returns
     -------
     Any
         An ``attrs`` attribute, and a validator checking that this field is of the correct type.
 
+    Raises
+    ------
+    AssertionError
+        If `field_type` is a string and this string is not "self"
+
     Examples
     --------
-    >>> from isshub.domain.utils.entity import required_field, validated, BaseModel
+    >>> from isshub.domain.utils.entity import required_field, validated, BaseEntity
     >>>
     >>> @validated()
-    ... class MyModel(BaseModel):
+    ... class MyEntity(BaseEntity):
     ...     my_field: str = required_field(str)
     >>>
     >>> from isshub.domain.utils.testing.validation import check_field_not_nullable
-    >>> check_field_not_nullable(MyModel, 'my_field', my_field='foo')
+    >>> check_field_not_nullable(MyEntity, 'my_field', my_field='foo')
 
     """
     metadata = {}
     if relation_verbose_name:
         metadata["relation_verbose_name"] = relation_verbose_name
 
+    assert not isinstance(field_type, str) or field_type == "self"
+
     kwargs = {
         "validator": instance_of_self()
-        if field_type == "self"
+        if isinstance(field_type, str)
         else attr.validators.instance_of(field_type),
         "metadata": metadata,
     }
     if frozen:
         kwargs["on_setattr"] = attr.setters.frozen
 
-    return attr.ib(**kwargs)
+    return attr.ib(**kwargs)  # type: ignore
 
 
-def validated():
+def validated() -> Any:
     """Decorate an entity to handle validation.
 
     This will let ``attrs`` manage the class, using slots for fields, and forcing attributes to
@@ -140,20 +185,20 @@ def validated():
 
     Examples
     --------
-    >>> from isshub.domain.utils.entity import required_field, validated, BaseModel
+    >>> from isshub.domain.utils.entity import required_field, validated, BaseEntity
     >>>
     >>> @validated()
-    ... class MyModel(BaseModel):
+    ... class MyEntity(BaseEntity):
     ...     my_field: str = required_field(str)
     >>>
-    >>> MyModel.__slots__
+    >>> MyEntity.__slots__
     ('my_field',)
     >>>
-    >>> instance = MyModel()
+    >>> instance = MyEntity()
     Traceback (most recent call last):
         ...
     TypeError: __init__() missing 1 required keyword-only argument: 'my_field'
-    >>> instance = MyModel(my_field='foo')
+    >>> instance = MyEntity(my_field='foo')
     >>> instance.my_field
     'foo'
     >>> instance.validate()
@@ -164,28 +209,33 @@ def validated():
     TypeError: ("'my_field' must be <class 'str'> (got None that is a <class 'NoneType'>)...
 
     """
-    return attr.s(slots=True, kw_only=True)
+    return attr.s(slots=True, kw_only=True, eq=False)
 
 
-def field_validator(field):
+TValidateMethod = TypeVar(
+    "TValidateMethod", bound=Callable[[Any, "Attribute[_T]", _T], None]
+)
+
+
+class field_validator:  # pylint: disable=invalid-name
     """Decorate an entity method to make it a validator of the given `field`.
+
+    Notes
+    -----
+    It's easier to implement as a function but we couldn't make mypy work with it.
+    Thanks to https://github.com/python/mypy/issues/1551#issuecomment-253978622
 
     Parameters
     ----------
     field : Any
         The field to validate.
 
-    Returns
-    -------
-    Callable
-        The decorated method.
-
     Examples
     --------
-    >>> from isshub.domain.utils.entity import field_validator, required_field, BaseModel
+    >>> from isshub.domain.utils.entity import field_validator, required_field, BaseEntity
     >>>
     >>> @validated()
-    ... class MyModel(BaseModel):
+    ... class MyEntity(BaseEntity):
     ...    my_field: str = required_field(str)
     ...
     ...    @field_validator(my_field)
@@ -193,28 +243,47 @@ def field_validator(field):
     ...        if value != 'foo':
     ...            raise ValueError(f'{self.__class__.__name__}.my_field must be "foo"')
     >>>
-    >>> instance = MyModel(my_field='bar')
+    >>> instance = MyEntity(my_field='bar')
     Traceback (most recent call last):
         ...
-    ValueError: MyModel.my_field must be "foo"
-    >>> instance = MyModel(my_field='foo')
+    ValueError: MyEntity.my_field must be "foo"
+    >>> instance = MyEntity(my_field='foo')
     >>> instance.my_field
     'foo'
     >>> instance.my_field = 'bar'
     >>> instance.validate()
     Traceback (most recent call last):
         ...
-    ValueError: MyModel.my_field must be "foo"
+    ValueError: MyEntity.my_field must be "foo"
     >>> instance.my_field = 'foo'
     >>> instance.validate()
     >>> instance.my_field
     'foo'
 
     """
-    return field.validator
+
+    def __init__(self, field: "Attribute[_T]") -> None:
+        """Save the given field."""
+        self.field = field
+
+    def __call__(self, func: TValidateMethod) -> TValidateMethod:
+        """Decorate the given function.
+
+        Parameters
+        ----------
+        func: Callable
+            The validation method to decorate
+
+        Returns
+        -------
+        Callable
+            The decorated method.
+
+        """
+        return cast(TValidateMethod, self.field.validator(func))
 
 
-def validate_instance(instance):
+def validate_instance(instance: Any) -> Any:
     """Validate a whole instance.
 
     Parameters
@@ -229,13 +298,13 @@ def validate_instance(instance):
 
     Examples
     --------
-    >>> from isshub.domain.utils.entity import required_field, validate_instance, BaseModel
+    >>> from isshub.domain.utils.entity import required_field, validate_instance, BaseEntity
     >>>
     >>> @validated()
-    ... class MyModel(BaseModel):
+    ... class MyEntity(BaseEntity):
     ...    my_field: str = required_field(str)
     >>>
-    >>> instance = MyModel(my_field='foo')
+    >>> instance = MyEntity(my_field='foo')
     >>> validate_instance(instance)
     >>> instance.my_field = None
     >>> validate_instance(instance)
@@ -247,7 +316,9 @@ def validate_instance(instance):
     attr.validate(instance)
 
 
-def validate_positive_integer(value, none_allowed, display_name):
+def validate_positive_integer(
+    value: Any, none_allowed: bool, display_name: str
+) -> None:
     """Validate that the given `value` is a positive integer (``None`` accepted if `none_allowed`).
 
     Parameters
@@ -268,10 +339,10 @@ def validate_positive_integer(value, none_allowed, display_name):
 
     Examples
     --------
-    >>> from isshub.domain.utils.entity import field_validator, required_field, BaseModel
+    >>> from isshub.domain.utils.entity import field_validator, required_field, BaseEntity
     >>>
     >>> @validated()
-    ... class MyModel(BaseModel):
+    ... class MyEntity(BaseEntity):
     ...    my_field: int = required_field(int)
     ...
     ...    @field_validator(my_field)
@@ -282,28 +353,28 @@ def validate_positive_integer(value, none_allowed, display_name):
     ...            display_name=f"{self.__class__.__name__}.my_field",
     ...        )
     >>>
-    >>> instance = MyModel(my_field='foo')
+    >>> instance = MyEntity(my_field='foo')
     Traceback (most recent call last):
         ...
     TypeError: ("'my_field' must be <class 'int'> (got 'foo' that is a <class 'str'>)...
-    >>> instance = MyModel(my_field=-2)
+    >>> instance = MyEntity(my_field=-2)
     Traceback (most recent call last):
         ...
-    ValueError: MyModel.my_field must be a positive integer
-    >>> instance = MyModel(my_field=0)
+    ValueError: MyEntity.my_field must be a positive integer
+    >>> instance = MyEntity(my_field=0)
     Traceback (most recent call last):
         ...
-    ValueError: MyModel.my_field must be a positive integer
-    >>> instance = MyModel(my_field=1.1)
+    ValueError: MyEntity.my_field must be a positive integer
+    >>> instance = MyEntity(my_field=1.1)
     Traceback (most recent call last):
         ...
     TypeError: ("'my_field' must be <class 'int'> (got 1.1 that is a <class 'float'>)...
-    >>> instance = MyModel(my_field=1)
+    >>> instance = MyEntity(my_field=1)
     >>> instance.my_field = -2
     >>> instance.validate()
     Traceback (most recent call last):
         ...
-    ValueError: MyModel.my_field must be a positive integer
+    ValueError: MyEntity.my_field must be a positive integer
 
     """
     if none_allowed and value is None:
@@ -315,9 +386,70 @@ def validate_positive_integer(value, none_allowed, display_name):
         raise ValueError(f"{display_name} must be a positive integer")
 
 
+def validate_uuid(value: Any, none_allowed: bool, display_name: str) -> None:
+    """Validate that the given `value` is a uuid (version 4) (``None`` accepted if `none_allowed`).
+
+    Parameters
+    ----------
+    value : Any
+        The value to validate as a uuid.
+    none_allowed : bool
+        If ``True``, the value can be ``None``. If ``False``, the value must be a uuid.
+    display_name : str
+        The name of the field to display in errors.
+
+    Raises
+    ------
+    TypeError
+        If `value` is not of type ``UUID`` version 4 .
+
+    Examples
+    --------
+    >>> from uuid import UUID
+    >>> from isshub.domain.utils.entity import field_validator, required_field, BaseEntity
+    >>>
+    >>> @validated()
+    ... class MyEntity(BaseEntity):
+    ...    my_field: UUID = required_field(UUID)
+    ...
+    ...    @field_validator(my_field)
+    ...    def validate_my_field(self, field, value):
+    ...        validate_uuid(
+    ...            value=value,
+    ...            none_allowed=False,
+    ...            display_name=f"{self.__class__.__name__}.my_field",
+    ...        )
+    >>>
+    >>> instance = MyEntity(my_field='foo')
+    Traceback (most recent call last):
+        ...
+    TypeError: ("'my_field' must be <class 'uuid.UUID'> (got 'foo' that is a <class 'str'>)...
+    >>> instance = MyEntity(my_field='7298d61a-f08f-4f83-b75e-934e786eb43d')
+    Traceback (most recent call last):
+        ...
+    TypeError: ("'my_field' must be <class 'uuid.UUID'> (got '7298d61a-f08f-4f83-b75e-934e786eb43d' that is a <class 'str'>)...
+    >>> instance = MyEntity(my_field=UUID('19f49bc8-06e5-11eb-8465-bf44725d7bd3'))
+    Traceback (most recent call last):
+        ...
+    TypeError: MyEntity.my_field must be a UUID version 4
+    >>> instance = MyEntity(my_field=UUID('7298d61a-f08f-4f83-b75e-934e786eb43d'))
+    >>> instance.my_field = UUID('19f49bc8-06e5-11eb-8465-bf44725d7bd3')
+    >>> instance.validate()
+    Traceback (most recent call last):
+        ...
+    TypeError: MyEntity.my_field must be a UUID version 4
+
+    """
+    if none_allowed and value is None:
+        return
+
+    if not isinstance(value, UUID) or value.version != 4:
+        raise TypeError(f"{display_name} must be a UUID version 4")
+
+
 @validated()
-class BaseModel:
-    """A base model without any field, that is able to validate itself."""
+class BaseEntity:
+    """A base entity without any field, that is able to validate itself."""
 
     def validate(self) -> None:
         """Validate all fields of the current instance.
@@ -332,34 +464,67 @@ class BaseModel:
 
 
 @validated()
-class BaseModelWithId(BaseModel):
-    """A base model with an ``id``, that is able to validate itself.
+class BaseEntityWithIdentifier(BaseEntity):
+    """A base entity with an :obj:`~BaseEntityWithIdentifier.identifier`, that is able to validate itself.
 
     Attributes
     ----------
-    id : int
-        The identifier of the instance. Validated to be a positive integer.
+    identifier : UUID
+        The identifier of the instance. Validated to be a UUID version 4.
 
     """
 
-    id: int = required_field(int, frozen=True)
+    identifier: UUID = required_field(UUID, frozen=True)
 
-    @field_validator(id)
-    def validate_id_is_positive_integer(  # noqa  # pylint: disable=unused-argument
-        self, field, value
-    ):
-        """Validate that the ``id`` field is a positive integer.
+    @field_validator(identifier)
+    def validate_id_is_uuid(  # noqa  # pylint: disable=unused-argument
+        self, field: "Attribute[_T]", value: _T
+    ) -> None:
+        """Validate that the :obj:`BaseEntityWithIdentifier.identifier` field is a uuid.
 
         Parameters
         ----------
         field : Any
-            The field to validate. Passed via the ``@field_validator`` decorator.
+            The field to validate.
         value : Any
             The value to validate for the `field`.
 
         """
-        validate_positive_integer(
+        validate_uuid(
             value=value,
             none_allowed=False,
-            display_name=f"{self.__class__.__name__}.id",
+            display_name=f"{self.__class__.__name__}.identifier",
         )
+
+    def __hash__(self) -> int:
+        """Compute the hash of the entity for python internal hashing.
+
+        The hash is purely based on the entity's identifier, ie two different with the same
+        identifier will share the same hash. And as it's the same for ``__eq__`` method, two
+        different instances of the same entity class with the same identifier will always have the
+        same hash.
+
+        Returns
+        -------
+        int
+            The hash for the entity
+
+        """
+        return hash(self.identifier)
+
+    def __eq__(self, other: Any) -> bool:
+        """Check if the `other` object is the same as the current entity.
+
+        Parameters
+        ----------
+        other : Any
+            The object to compare with the actual entity.
+
+        Returns
+        -------
+        bool
+            ``True`` if the given `other` object is an instance of the same class as the current
+            entity, with the same identifier.
+
+        """
+        return self.__class__ is other.__class__ and self.identifier == other.identifier

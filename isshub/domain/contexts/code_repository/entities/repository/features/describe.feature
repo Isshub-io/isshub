@@ -1,41 +1,41 @@
-Feature: Describing a Repository
+Feature: Describing a repository
 
-    Scenario: A Repository has an id
-        Given a Repository
-        Then it must have a field named id
+    Scenario: A repository has an identifier
+        Given a repository
+        Then it must have a field named identifier
 
-    Scenario: A Repository id is a positive integer
-        Given a Repository
-        Then its id must be a positive integer
+    Scenario: A repository identifier is a uuid
+        Given a repository
+        Then its identifier must be a uuid
 
-    Scenario: A Repository id is mandatory
-        Given a Repository
-        Then its id is mandatory
+    Scenario: A repository identifier is mandatory
+        Given a repository
+        Then its identifier is mandatory
 
-    Scenario: A Repository id cannot be changed
-        Given a Repository
-        Then its id cannot be changed
+    Scenario: A repository identifier cannot be changed
+        Given a repository
+        Then its identifier cannot be changed
 
-    Scenario: A Repository has a name
-        Given a Repository
+    Scenario: A repository has a name
+        Given a repository
         Then it must have a field named name
 
-    Scenario: A Repository name is a string
-        Given a Repository
+    Scenario: A repository name is a string
+        Given a repository
         Then its name must be a string
 
-    Scenario: A Repository name is mandatory
-        Given a Repository
+    Scenario: A repository name is mandatory
+        Given a repository
         Then its name is mandatory
 
-    Scenario: A Repository has a namespace
-        Given a Repository
+    Scenario: A repository has a namespace
+        Given a repository
         Then it must have a field named namespace
 
-    Scenario: A Repository namespace is a Namespace
-        Given a Repository
+    Scenario: A repository namespace is a Namespace
+        Given a repository
         Then its namespace must be a Namespace
 
-    Scenario: A Repository namespace is mandatory
-        Given a Repository
+    Scenario: A repository namespace is mandatory
+        Given a repository
         Then its namespace is mandatory
